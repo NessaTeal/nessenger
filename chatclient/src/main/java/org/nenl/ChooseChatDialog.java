@@ -54,7 +54,9 @@ public class ChooseChatDialog extends Dialog {
 
 			chatroomName = newChatroomName.getText();
 			
-			shell.dispose();
+			if(!chatroomName.equals("")) {
+				shell.dispose();
+			}
         });
         
         chatroomList.addListener(SWT.MouseDoubleClick, event -> {

@@ -25,7 +25,7 @@ public class GUI {
 	private Text messageText;
 	private Button changeNickname;
 	private Button changeChatroom;
-	private Label chatroomName;
+	private Label chatroomNameLabel;
 	
 	GUI() {
 		connectionHandler = new ConnectionHandler();
@@ -67,24 +67,32 @@ public class GUI {
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
 		
-		messageText = new Text(shell, SWT.BORDER | SWT.MULTI);
+		messageText = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		messageText.setBounds(10, 243, 295, 44);
 		
 		Button sendButton = new Button(shell, SWT.NONE);
 		sendButton.setBounds(311, 262, 113, 25);
-		sendButton.setText("Send message");
+		sendButton.setText("Send Message");
 		
 		changeNickname = new Button(shell, SWT.NONE);
 		changeNickname.setBounds(192, 10, 113, 25);
 		changeNickname.setText("Change Nickname");
 		
+		changeNickname.addListener(SWT.Selection, event -> {
+			chooseNickname();
+		});
+		
 		changeChatroom = new Button(shell, SWT.NONE);
 		changeChatroom.setBounds(311, 10, 113, 25);
 		changeChatroom.setText("Change Chatroom");
 		
-		chatroomName = new Label(shell, SWT.NONE);
-		chatroomName.setBounds(10, 15, 176, 15);
-		chatroomName.setText("New Label");
+		changeChatroom.addListener(SWT.Selection, event -> {
+			chooseOrCreateChat();
+		});
+		
+		chatroomNameLabel = new Label(shell, SWT.WRAP);
+		chatroomNameLabel.setBounds(10, 15, 176, 15);
+		chatroomNameLabel.setText("Chatroom name");
 		
 		sendButton.addListener(SWT.Selection, event -> {
 			connectionHandler.sendMessage(messageText.getText());
@@ -126,9 +134,10 @@ public class GUI {
 			@Override
 			public void run() {
 
-				Label newChatMessage;
-				newChatMessage = new Label(composite, SWT.NONE);
+				Text newChatMessage;
+				newChatMessage = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 				newChatMessage.setText(line);
+				
 				scrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				composite.layout();
 			}
@@ -153,5 +162,7 @@ public class GUI {
 		} else {
 			connectionHandler.createChat(chatroomName);
 		}
+		
+		chatroomNameLabel.setText(chatroomName);
 	}
 }

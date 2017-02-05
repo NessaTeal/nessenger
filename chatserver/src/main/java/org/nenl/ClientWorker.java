@@ -61,6 +61,11 @@ public class ClientWorker implements Runnable {
 					switch (type) {
 						case "chooseNickname":
 						
+							if(nickname != null && chatroomName != null) {
+								chatrooms.get(chatroomName).writeToChat("User " + nickname + " changes nickname to "
+																		+ parsedData.getString("nickname"));
+							}
+							
 							nickname = parsedData.getString("nickname");
 							
 							logger.info("User chose nickname: " + nickname);

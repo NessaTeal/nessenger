@@ -16,14 +16,16 @@ import org.json.JSONObject;
 
 public class ClientWorker implements Runnable {
 	
-	private static Logger logger = Logger.getLogger(ClientWorker.class);
+	protected static Logger logger = Logger.getLogger(ClientWorker.class);
+	protected static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
-	private Socket clientSocket;
-	private String nickname;
-	private Map<String, Chatroom> chatrooms;
-	private String chatroomName;
+	protected Socket clientSocket;
+	protected String nickname;
+	protected Map<String, Chatroom> chatrooms;
+	protected String chatroomName;
+	protected PrintWriter out;
 	
-	public ClientWorker(Socket clientSocket, Map<String, Chatroom> chatrooms) {
+	ClientWorker(Socket clientSocket, Map<String, Chatroom> chatrooms) {
 		this.clientSocket = clientSocket;
 		this.chatrooms = chatrooms;
 	}
@@ -31,7 +33,6 @@ public class ClientWorker implements Runnable {
 	@Override
 	public void run() {
 		BufferedReader in = null;
-		PrintWriter out = null;
 
 		try {
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -44,8 +45,6 @@ public class ClientWorker implements Runnable {
 
 		String line = "";
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-		
 		while(true) {
 			try {
 				if((line = in.readLine()) != null) {
@@ -54,101 +53,48 @@ public class ClientWorker implements Runnable {
 					
 					JSONObject parsedData = new JSONObject(line);
 					
-					logger.info("Received from client " + clientSocket.getInetAddress());
-					
 					String type = parsedData.getString("type"); 
 					
 					switch (type) {
 						case "chooseNickname":
-						
-							if(nickname != null && chatroomName != null) {
-								chatrooms.get(chatroomName).writeToChat("User " + nickname + " changes nickname to "
-																		+ parsedData.getString("nickname"));
-							}
 							
-							nickname = parsedData.getString("nickname");
-							
-							logger.info("User chose nickname: " + nickname);
+							chooseNickname(parsedData);
 							
 							break;
 					
 						case "createChatroom":
 							
-							chatroomName = parsedData.getString("chatroomName");
-							
-							if(!chatrooms.containsKey(chatroomName)) {
-								chatrooms.put(chatroomName, new Chatroom(chatroomName));
-							}
-							
-							chatrooms.get(chatroomName).addUser(nickname, out);
-							
-							logger.info("User " + nickname + " created and joined chat " + chatroomName);
+							createChatroom(parsedData);
 							
 							break;
 							
 						case "joinChatroom":
 							
-							chatroomName = parsedData.getString("chatroomName");
-							
-							chatrooms.get(chatroomName).addUser(nickname, out);
-							
-							logger.info("User" + nickname + " joined chat " + chatroomName);
+							joinChatroom(parsedData);
 							
 							break;
 							
 						case "quitChatroom":
 							
-							String quitMessage = "User " + nickname + " left";
-
-							chatrooms.get(chatroomName).writeToChat(quitMessage);
-							
-							chatrooms.get(chatroomName).removeUser(nickname);
-							
-							logger.info(quitMessage + " chat " + chatroomName);
-							
-							chatroomName = null;
+							quitChatroom(parsedData);
 							
 							break;
 							
 						case "getChatroomList":
 							
-							JSONObject chatroomListMessage = new JSONObject();
-							
-							JSONArray chatroomList = new JSONArray(chatrooms.keySet());
-							
-							chatroomListMessage.put("chatrooms", chatroomList);
-							
-							out.println(chatroomListMessage.toString());
-							
-							logger.info("User " + nickname + " retrieved chatroom list");
+							getChatroomList(parsedData);
 							
 							break;
 							
 						case "message":
 							
-							String message = parsedData.getString("message");
-
-							Date date = Calendar.getInstance().getTime();
-							
-							chatrooms.get(chatroomName).writeToChat("[" + sdf.format(date) + "] " + nickname + ": " + message);
-							
-							logger.info("User " + nickname + " in chat " + chatroomName + " wrote message: " + message);
+							sendMessageToAll(parsedData);
 							
 							break;
 							
 						case "disconnect":
 							
-							if(chatroomName != null) {
-								
-								String disconnectMessage = "User " + nickname + " disconnects";
-								
-								chatrooms.get(chatroomName).writeToChat(disconnectMessage);
-							}
-							
-							clientSocket.shutdownOutput();
-							clientSocket.shutdownInput();
-							
-							logger.info("User " + nickname + " disconnects");
+							disconnect(parsedData);
 							
 							return;
 							
@@ -157,10 +103,120 @@ public class ClientWorker implements Runnable {
 					}
 				}
 			}
-			catch(Exception e) {
+			catch(IOException e) {
 				e.printStackTrace();
 				return;
 			}
 		}
+	}
+	
+	protected void chooseNickname(JSONObject parsedData) {
+
+		if(nickname != null && chatroomName != null) {
+			JSONObject changeNicknameMessage = new JSONObject();
+			String changeNickname = "User " + nickname + " changes nickname to "
+					+ parsedData.getString("nickname");
+			
+			changeNicknameMessage.put("type", "message");
+			changeNicknameMessage.put("message", changeNickname);
+			
+			chatrooms.get(chatroomName).writeToChat(changeNicknameMessage.toString());
+		}
+		
+		nickname = parsedData.getString("nickname");
+		
+		logger.info("User chose nickname: " + nickname);
+	}
+	
+	protected void joinChatroom(JSONObject parsedData) {
+		
+		chatroomName = parsedData.getString("chatroomName");
+		
+		JSONObject response = new JSONObject();
+		String message = "User " + nickname + " joins chat.";
+		
+		response.put("type", "message");
+		response.put("message", message);
+		
+		chatrooms.get(chatroomName).writeToChat(response.toString());
+		chatrooms.get(chatroomName).addUser(nickname, out);
+		
+		logger.info("User" + nickname + " joined chat " + chatroomName);
+	}
+	
+	protected void quitChatroom(JSONObject parsedData) {
+		
+		JSONObject response = new JSONObject();
+		String message = "User " + nickname + " left";
+		
+		response.put("type", "message");
+		response.put("message", message);
+		
+		chatrooms.get(chatroomName).writeToChat(response.toString());
+		chatrooms.get(chatroomName).removeUser(nickname);
+		
+		logger.info(message + " chat " + chatroomName);
+		
+		chatroomName = null;
+	}
+	
+	protected void disconnect(JSONObject parsedData) throws IOException {
+
+		if(chatroomName != null) {
+			
+			JSONObject response = new JSONObject();
+			String message = "User " + nickname + " disconnects";
+			
+			response.put("type", "message");
+			response.put("message", message);
+			
+			chatrooms.get(chatroomName).writeToChat(response.toString());
+		}
+		
+		clientSocket.shutdownOutput();
+		clientSocket.shutdownInput();
+		
+		logger.info("User " + nickname + " disconnects");
+	}
+	
+	protected void sendMessageToAll(JSONObject parsedData) {
+		
+		String receivedMessage = parsedData.getString("message");
+		JSONObject response = new JSONObject();
+		Date date = Calendar.getInstance().getTime();
+		String dateString = "[" + sdf.format(date) + "]";
+		
+		response.put("type", "message");
+		response.put("message", dateString + " " + nickname + ": " + receivedMessage);
+		
+		chatrooms.get(chatroomName).writeToChat(response.toString());
+		
+		logger.info("User " + nickname + " in chat " + chatroomName + " wrote message: " + receivedMessage);
+	}
+	
+	protected void getChatroomList(JSONObject parsedData) {
+		
+		JSONObject response = new JSONObject();
+		JSONArray chatroomArray = new JSONArray(chatrooms.keySet());
+		
+		response.put("type", "management");
+		response.put("chatrooms", chatroomArray);
+		
+		out.println(response.toString());
+		
+		logger.info("User " + nickname + " retrieved chatroom list");
+	}
+	
+	protected void createChatroom(JSONObject parsedData) {
+
+		chatroomName = parsedData.getString("chatroomName");
+		
+		if(!chatrooms.containsKey(chatroomName)) {
+			chatrooms.put(chatroomName, new Chatroom(chatroomName));
+		}
+		
+		chatrooms.get(chatroomName).addUser(nickname, out);
+		
+		logger.info("User " + nickname + " created and joined chat " + chatroomName);
 	}
 }

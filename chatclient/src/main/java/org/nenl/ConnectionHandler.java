@@ -3,6 +3,8 @@ package org.nenl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,9 +15,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 class ConnectionHandler {
-    private Socket socket;
-    private PrintWriter out;
-    BufferedReader in;
+    protected Socket socket;
+    protected PrintWriter out;
+    protected BufferedReader in;
+    protected BufferedReader managementIn;
+    
+    BufferedReader messageIn;
     
     void connect() throws IOException {
         socket = new Socket("localhost", 61111);
@@ -23,6 +28,53 @@ class ConnectionHandler {
         out = new PrintWriter(socket.getOutputStream(), true);
 
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        
+        new Thread(new Runnable() {
+			@SuppressWarnings("resource")
+			public void run() {
+				String line;
+				try {
+			        PipedInputStream pipeMessageIn = new PipedInputStream();
+			        PipedOutputStream pipeStreamOut = new PipedOutputStream(pipeMessageIn);
+			        
+			        PrintWriter messageOut = new PrintWriter(pipeStreamOut, true);
+					messageIn = new BufferedReader(new InputStreamReader(pipeMessageIn));
+						
+			        PipedInputStream pipeManagementIn = new PipedInputStream();
+			        PipedOutputStream pipeManagementOut = new PipedOutputStream(pipeManagementIn);
+			        
+			        PrintWriter managementOut = new PrintWriter(pipeManagementOut, true);
+			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn));
+					
+					while((line = in.readLine()) != null) {
+						
+						JSONObject receivedMessage = new JSONObject(line);
+						
+						String type = receivedMessage.getString("type");
+						
+						switch (type) {
+							case "message":
+								
+								messageOut.println(receivedMessage.getString("message"));
+								
+								break;
+	
+							case "management":
+								
+								managementOut.println(receivedMessage);
+								
+								break;
+								
+							default:
+								break;
+						}
+					}
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
     }
 
     void disconnect() {
@@ -32,7 +84,7 @@ class ConnectionHandler {
             disconnectMsg.put("type", "disconnect");
 
             out.println(disconnectMsg.toString());
-
+            
             socket.shutdownInput();
             socket.shutdownOutput();
         } catch (IOException e) {
@@ -70,7 +122,7 @@ class ConnectionHandler {
         }
     }
 
-    void createChat(String chatroomName) {
+    void createChatroom(String chatroomName) {
         try {
             JSONObject message = new JSONObject();
 
@@ -84,13 +136,25 @@ class ConnectionHandler {
         }
     }
     
-    void joinChat(String chatroomName) {
+    void joinChatroom(String chatroomName) {
     	try {
             JSONObject message = new JSONObject();
 
             message.put("type", "joinChatroom");
 
             message.put("chatroomName", chatroomName);
+
+            out.println(message.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    void quitChatroom() {
+    	try {
+            JSONObject message = new JSONObject();
+
+            message.put("type", "quitChatroom");
 
             out.println(message.toString());
         } catch (JSONException e) {
@@ -106,7 +170,7 @@ class ConnectionHandler {
 
             out.println(request.toString());
 
-            String answer = in.readLine();
+            String answer = managementIn.readLine();
             
             JSONObject response = new JSONObject(answer);
             

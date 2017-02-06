@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +52,11 @@ class ConnectionHandler {
 			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn));
 					
 					while(!stopListenerThread) {
+						
+						if(!in.ready()) {
+							TimeUnit.MILLISECONDS.sleep(20);
+							continue;
+						}
 						
 						String line = in.readLine();
 						

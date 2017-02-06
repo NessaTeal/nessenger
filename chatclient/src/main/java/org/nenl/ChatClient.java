@@ -2,9 +2,12 @@ package org.nenl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +32,7 @@ public class ChatClient {
 	protected Button changeChatroomButton;
 	protected Button sendButton;
 	protected Label chatroomNameLabel;
+	protected volatile boolean stopListeningThread = false;
 	
 	public static void main(String[] args) {
 		new ChatClient();
@@ -102,6 +106,8 @@ public class ChatClient {
 			@Override
 			public void handleEvent(Event event) {
 				
+				stopListeningThread = true;
+				
 				connectionHandler.disconnect();
 			}
 		});
@@ -119,6 +125,21 @@ public class ChatClient {
 			chooseNickname();
 		});
 		
+		messageField.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.keyCode == SWT.CR) {
+					e.doit = false;
+					connectionHandler.sendMessage(messageField.getText());
+					messageField.setText("");
+				}
+			}
+		});
 	}
 	
 	protected void connectToServer() {
@@ -130,7 +151,7 @@ public class ChatClient {
 		} catch(IOException e) {
 			MessageBox errorConnectingDialog = new MessageBox(shell, SWT.ERROR | SWT.OK);
 			errorConnectingDialog.setText("Unable to connect to server");
-			errorConnectingDialog.setMessage("Check your connection and try to ping 34.248.239.43 or check your firewall blocking port 61111");
+			errorConnectingDialog.setMessage("Check your connection and try to ping 34.248.239.43 or check your firewall blocking port 61111, for further information refer to logs.");
 			errorConnectingDialog.open();
 			
 			return;
@@ -141,11 +162,16 @@ public class ChatClient {
 
 		new Thread(new Runnable() {
 			public void run() {
-				String line;
 				
 				try {
-					while((line = connectionHandler.messageIn.readLine()) != null) {
-						createChatMessage(line);
+					while(!stopListeningThread){
+						
+						if(!connectionHandler.messageIn.ready()) {
+							TimeUnit.MILLISECONDS.sleep(20);
+							continue;
+						}
+						
+						createChatMessage(connectionHandler.messageIn.readLine());
 					}
 				}
 				catch(Exception e) {
@@ -157,7 +183,7 @@ public class ChatClient {
 	
 	protected void createChatMessage(String line) {
 		
-		display.asyncExec(new Runnable() {
+		display.syncExec(new Runnable() {
 
 			@Override
 			public void run() {

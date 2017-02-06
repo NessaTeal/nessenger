@@ -1,6 +1,8 @@
 package org.nenl;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -43,6 +45,22 @@ public class ChooseNicknameDialog extends Dialog {
 			shell.dispose();
         	
         });
+        
+        nicknameField.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.keyCode == SWT.CR) {
+					nickname = nicknameField.getText();
+					
+					shell.dispose();
+				}
+			}
+		});
         
         shell.open();
         Display display = parent.getDisplay();

@@ -24,7 +24,7 @@ class ConnectionHandler {
     BufferedReader messageIn;
     
     void connect() throws IOException {
-        socket = new Socket("localhost", 61111);
+        socket = new Socket("34.248.239.43", 61111);
 
         out = new PrintWriter(socket.getOutputStream(), true);
 

@@ -19,6 +19,7 @@ class ConnectionHandler {
     protected PrintWriter out;
     protected BufferedReader in;
     protected BufferedReader managementIn;
+    protected volatile boolean stopListenerThread = false;
     
     BufferedReader messageIn;
     
@@ -29,15 +30,18 @@ class ConnectionHandler {
 
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         
+        createListenerThread();
+    }
+    
+    protected void createListenerThread() {
         new Thread(new Runnable() {
-			@SuppressWarnings("resource")
 			public void run() {
-				String line;
+				
 				try {
 			        PipedInputStream pipeMessageIn = new PipedInputStream();
-			        PipedOutputStream pipeStreamOut = new PipedOutputStream(pipeMessageIn);
+			        PipedOutputStream pipeMessageOut = new PipedOutputStream(pipeMessageIn);
 			        
-			        PrintWriter messageOut = new PrintWriter(pipeStreamOut, true);
+			        PrintWriter messageOut = new PrintWriter(pipeMessageOut, true);
 					messageIn = new BufferedReader(new InputStreamReader(pipeMessageIn));
 						
 			        PipedInputStream pipeManagementIn = new PipedInputStream();
@@ -46,7 +50,9 @@ class ConnectionHandler {
 			        PrintWriter managementOut = new PrintWriter(pipeManagementOut, true);
 			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn));
 					
-					while((line = in.readLine()) != null) {
+					while(!stopListenerThread) {
+						
+						String line = in.readLine();
 						
 						JSONObject receivedMessage = new JSONObject(line);
 						
@@ -69,6 +75,15 @@ class ConnectionHandler {
 								break;
 						}
 					}
+
+					messageIn.close();
+					messageOut.close();
+					managementIn.close();
+					managementOut.close();
+					pipeMessageIn.close();
+					pipeMessageOut.close();
+					pipeManagementIn.close();
+					pipeManagementOut.close();
 				}
 				catch(Exception e) {
 					e.printStackTrace();
@@ -84,6 +99,8 @@ class ConnectionHandler {
             disconnectMsg.put("type", "disconnect");
 
             out.println(disconnectMsg.toString());
+            
+            stopListenerThread = true;
             
             socket.shutdownInput();
             socket.shutdownOutput();

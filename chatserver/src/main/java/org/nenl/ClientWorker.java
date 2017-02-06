@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,7 +36,7 @@ public class ClientWorker implements Runnable {
 		BufferedReader in = null;
 
 		try {
-			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),Charset.forName("UTF-8")));
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
 		}
 		catch(IOException e) {
@@ -151,9 +152,9 @@ public class ClientWorker implements Runnable {
 		
 		response.put("type", "message");
 		response.put("message", message);
-		
-		chatrooms.get(chatroomName).writeToChat(response.toString());
+
 		chatrooms.get(chatroomName).removeUser(nickname);
+		chatrooms.get(chatroomName).writeToChat(response.toString());
 		
 		logger.info(message + " chat " + chatroomName);
 		

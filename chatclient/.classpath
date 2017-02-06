@@ -22,5 +22,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Nenl/workspace/multiplatform-swt-master/multiplatform-swt-loader/target/multiplatform-swt-loader-4.6-multiplatform.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -1,6 +1,7 @@
 package org.nenl;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -136,6 +137,7 @@ public class ChatClient {
 				if(e.keyCode == SWT.CR) {
 					e.doit = false;
 					connectionHandler.sendMessage(messageField.getText());
+					
 					messageField.setText("");
 				}
 			}
@@ -153,6 +155,8 @@ public class ChatClient {
 			errorConnectingDialog.setText("Unable to connect to server");
 			errorConnectingDialog.setMessage("Check your connection and try to ping 34.248.239.43 or check your firewall blocking port 61111, for further information refer to logs.");
 			errorConnectingDialog.open();
+			
+			e.printStackTrace();
 			
 			return;
 		}
@@ -193,6 +197,14 @@ public class ChatClient {
 				newChatMessage.setText(line);
 				
 				scrollingWrapper.setMinSize(chatContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				
+				//If users currently looks at bottom of chat then scroll to the bottom
+				
+				if(chatContent.getSize().y - scrollingWrapper.getOrigin().y - scrollingWrapper.getSize().y <= 100) {
+				
+					scrollingWrapper.setOrigin(0, chatContent.getSize().y);
+				}
+				
 				chatContent.layout();
 			}
 			

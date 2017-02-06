@@ -20,3 +20,5 @@ Type of messages server accepts:
 
 On points 1, 3, 4, 5 and 7 server responds with JSON with type "message" and "message" contains message that will be written on users outputs.
 Point 6 produce JSON with type "management" and "chatroomList" contains JSONArray with list.
+
+Multiplatform jar is created using https://github.com/jendap/multiplatform-swt.

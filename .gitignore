@@ -50,4 +50,6 @@ Temporary Items
 chatserver/target/*
 chatclient/target/*
 !chatserver/target/chatserver-1.0-jar-with-dependencies.jar
-!chatclient/target/chatclient-1.0-jar-with-dependencies.jar
+!chatclient/target/chatclient-1.0.jar
+chatclient/.settings/*
+chatserver/.settings/*

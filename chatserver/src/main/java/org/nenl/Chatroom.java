@@ -1,31 +1,31 @@
 package org.nenl;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Chatroom {
 	
 	String name;
 
-	List<String> users = new ArrayList<>();
-	List<PrintWriter> userOutputs = new ArrayList<>();
+	Map<String, PrintWriter> userOutputs;
 	
 	public Chatroom(String name) {
 		this.name = name;
+		
+		userOutputs = new HashMap<>();
 	}
 	
 	public void addUser(String userName, PrintWriter out) {
-		users.add(userName);
-		userOutputs.add(out);
+		userOutputs.put(userName, out);
 	}
 	
 	public void removeUser(String userName) {
-		users.remove(userName);
+		userOutputs.remove(userName);
 	}
 	
 	public void writeToChat(String message) {
-		for(PrintWriter out : userOutputs) {
+		for(PrintWriter out : userOutputs.values()) {
 			out.println(message);
 		}
 	}

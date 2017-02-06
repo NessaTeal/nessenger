@@ -60,10 +60,13 @@ public class ChooseChatDialog extends Dialog {
         });
         
         chatroomList.addListener(SWT.MouseDoubleClick, event -> {
-
-			chatroomName = chatroomList.getSelection()[0];
-			
-			shell.dispose();
+        	
+        	if(chatroomList.getSelectionCount() == 1) {
+        	
+				chatroomName = chatroomList.getSelection()[0];
+				
+				shell.dispose();
+        	}
         });
         
         shell.open();

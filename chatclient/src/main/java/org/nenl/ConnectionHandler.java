@@ -7,6 +7,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,11 +26,11 @@ class ConnectionHandler {
     BufferedReader messageIn;
     
     void connect() throws IOException {
-        socket = new Socket("34.248.239.43", 61111);
+        socket = new Socket("localhost", 61111);
 
         out = new PrintWriter(socket.getOutputStream(), true);
 
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream(), Charset.forName("UTF-8")));
         
         createListenerThread();
     }
@@ -43,13 +44,13 @@ class ConnectionHandler {
 			        PipedOutputStream pipeMessageOut = new PipedOutputStream(pipeMessageIn);
 			        
 			        PrintWriter messageOut = new PrintWriter(pipeMessageOut, true);
-					messageIn = new BufferedReader(new InputStreamReader(pipeMessageIn));
+					messageIn = new BufferedReader(new InputStreamReader(pipeMessageIn, Charset.forName("UTF-8")));
 						
 			        PipedInputStream pipeManagementIn = new PipedInputStream();
 			        PipedOutputStream pipeManagementOut = new PipedOutputStream(pipeManagementIn);
 			        
 			        PrintWriter managementOut = new PrintWriter(pipeManagementOut, true);
-			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn));
+			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn, Charset.forName("UTF-8")));
 					
 					while(!stopListenerThread) {
 						

@@ -8,6 +8,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -83,6 +84,7 @@ public class ChatClient {
 		
 		messageField = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		messageField.setBounds(10, 243, 295, 44);
+		messageField.setFont(new Font(display, "UTF-8", 9, SWT.NORMAL));
 		
 		sendButton = new Button(shell, SWT.NONE);
 		sendButton.setBounds(311, 262, 113, 25);

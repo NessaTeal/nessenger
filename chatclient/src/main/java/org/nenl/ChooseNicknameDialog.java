@@ -3,6 +3,7 @@ package org.nenl;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -11,7 +12,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class ChooseNicknameDialog extends Dialog {
-	private String nickname;
+	
+	protected String nickname;
 
 	public ChooseNicknameDialog(Shell parent) {
 		super(parent);
@@ -33,6 +35,7 @@ public class ChooseNicknameDialog extends Dialog {
 
     	Text nicknameField = new Text(shell, SWT.BORDER);
         nicknameField.setBounds(10, 31, 224, 21);
+		nicknameField.setFont(new Font(parent.getDisplay(), "UTF-8", 9, SWT.NORMAL));
         
         Button chooseNickname = new Button(shell, SWT.NONE);
         chooseNickname.setBounds(159, 56, 75, 25);

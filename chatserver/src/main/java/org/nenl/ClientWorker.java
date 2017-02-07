@@ -11,13 +11,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientWorker implements Runnable {
 	
-	protected static Logger logger = Logger.getLogger(ClientWorker.class);
+	protected static Logger logger = LoggerFactory.getLogger(ClientWorker.class);
 	protected static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
 	protected Socket clientSocket;

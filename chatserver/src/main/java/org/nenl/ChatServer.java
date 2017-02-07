@@ -6,11 +6,12 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChatServer  {
 	
-	private static Logger logger = Logger.getLogger(ChatServer.class);
+	private static Logger logger = LoggerFactory.getLogger(ChatServer.class);
 	
 	public static void main(String[] args ) throws Exception {
     	

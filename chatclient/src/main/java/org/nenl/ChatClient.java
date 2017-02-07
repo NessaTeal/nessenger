@@ -1,7 +1,6 @@
 package org.nenl;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -20,8 +19,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChatClient {
+	
+	private static Logger logger = LoggerFactory.getLogger(ChatClient.class);
 	
 	protected Display display;
 	protected Shell shell;
@@ -98,6 +101,8 @@ public class ChatClient {
 		chatroomNameLabel.setText("Chatroom name");
 		
         shell.open();
+        
+        logger.info("GUI is initialized.");
 	}
 	
 	protected void attachListeners() {
@@ -142,6 +147,8 @@ public class ChatClient {
 				}
 			}
 		});
+		
+		logger.info("Listeners are attached.");
 	}
 	
 	protected void connectToServer() {
@@ -156,9 +163,9 @@ public class ChatClient {
 			errorConnectingDialog.setMessage("Check your connection and try to ping 34.248.239.43 or check your firewall blocking port 61111, for further information refer to logs.");
 			errorConnectingDialog.open();
 			
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			
-			return;
+			System.exit(0);
 		}
 	}
 	
@@ -179,10 +186,12 @@ public class ChatClient {
 					}
 				}
 				catch(Exception e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}).start();
+		
+		logger.info("Listener thread is started.");
 	}
 	
 	protected void createChatMessage(String line) {
@@ -209,18 +218,26 @@ public class ChatClient {
 			}
 			
 		});
+		
+		logger.info("New message received.");
 	}
 	
 	protected void chooseNickname() {
+		
+		logger.info("Openning choose nickname dialog");
 
 		String nickname = new ChooseNicknameDialog(shell).open();
 		
 		connectionHandler.setNickname(nickname);
+		
+		logger.info("Nickname is set to " + nickname);
 	}
 	
 	protected void chooseOrCreateChat() {
 		
 		List<String> chatroomList = connectionHandler.getChatroomList();
+		
+		logger.info("Openning choose chatroom dialog");
 				
 		String chatroomName = new ChooseChatDialog(shell, chatroomList).open();
 		
@@ -232,8 +249,12 @@ public class ChatClient {
 			
 			if(chatroomList.contains(chatroomName)) {
 				connectionHandler.joinChatroom(chatroomName);
+				
+				logger.info("Connected to chat " + chatroomName);
 			} else {
 				connectionHandler.createChatroom(chatroomName);
+				
+				logger.info("Created chat " + chatroomName);
 			}
 			
 			chatroomNameLabel.setText(chatroomName);

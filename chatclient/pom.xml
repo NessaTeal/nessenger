@@ -26,10 +26,18 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20160810</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.1.10</version>
 		</dependency>
 	</dependencies>
 
@@ -112,6 +120,15 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		
+		<resources>
+	      <resource>
+	        <directory>resources</directory>
+	        <includes>
+	          <include>logback.xml</include>
+	        </includes>
+	      </resource>
+	    </resources>
 	</build>
 
 	<profiles>

@@ -39,8 +39,7 @@ public class ClientWorker implements Runnable {
 		try {
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(),Charset.forName("UTF-8")));
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
-		}
-		catch(IOException e) {
+		} catch(IOException e) {
 			logger.error("Stream is closed");
 			return;
 		}

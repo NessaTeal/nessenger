@@ -15,8 +15,13 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ConnectionHandler {
+	
+	private static Logger logger = LoggerFactory.getLogger(ChatClient.class);
+	
     protected Socket socket;
     protected PrintWriter out;
     protected BufferedReader in;
@@ -26,11 +31,16 @@ class ConnectionHandler {
     BufferedReader messageIn;
     
     void connect() throws IOException {
-        socket = new Socket("localhost", 61111);
+    	
+    	//IP address of my server 34.248.239.43
+    	
+        socket = new Socket("34.248.239.43", 61111);
 
         out = new PrintWriter(socket.getOutputStream(), true);
 
         in = new BufferedReader(new InputStreamReader(socket.getInputStream(), Charset.forName("UTF-8")));
+		
+		logger.info("Connection to server is successful.");
         
         createListenerThread();
     }
@@ -82,6 +92,8 @@ class ConnectionHandler {
 								break;
 						}
 					}
+					
+					logger.info("Closing internal resources.");
 
 					messageIn.close();
 					messageOut.close();
@@ -93,10 +105,12 @@ class ConnectionHandler {
 					pipeManagementOut.close();
 				}
 				catch(Exception e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}).start();
+        
+        logger.info("Listener thread is started");
     }
 
     void disconnect() {
@@ -107,12 +121,14 @@ class ConnectionHandler {
 
             out.println(disconnectMsg.toString());
             
+            logger.info("Disconnect message is sent");
+            
             stopListenerThread = true;
             
             socket.shutdownInput();
             socket.shutdownOutput();
         } catch (IOException e) {
-        	e.printStackTrace();
+        	logger.error(e.getMessage());
         }
     }
 
@@ -126,8 +142,10 @@ class ConnectionHandler {
             connect.put("nickname", nickname);
 
             out.println(connect.toString());
+            
+            logger.info("Sent nickname message is sent");
         } catch (JSONException e) {
-        	e.printStackTrace();
+        	logger.error(e.getMessage());
         }
     }
 
@@ -141,8 +159,10 @@ class ConnectionHandler {
             JSONmessage.put("message", message);
 
             out.println(JSONmessage.toString());
+            
+            logger.info("Message to chatroom is sent");
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -155,8 +175,10 @@ class ConnectionHandler {
             message.put("chatroomName", chatroomName);
 
             out.println(message.toString());
+            
+            logger.info("Create chatroom message is sent");
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
     
@@ -169,8 +191,10 @@ class ConnectionHandler {
             message.put("chatroomName", chatroomName);
 
             out.println(message.toString());
+            
+            logger.info("Join chatroom message is sent");
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
     
@@ -181,8 +205,10 @@ class ConnectionHandler {
             message.put("type", "quitChatroom");
 
             out.println(message.toString());
+            
+            logger.info("Quit chatroom message is sent");
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -194,9 +220,13 @@ class ConnectionHandler {
 
             out.println(request.toString());
 
+            logger.info("Chatroom list is requested");
+
             String answer = managementIn.readLine();
             
             JSONObject response = new JSONObject(answer);
+            
+            logger.info("Chatroom list is retrieved");
             
             JSONArray chatroomArray = response.getJSONArray("chatrooms");
 
@@ -209,7 +239,7 @@ class ConnectionHandler {
             return chatroomList;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         return new ArrayList<>();

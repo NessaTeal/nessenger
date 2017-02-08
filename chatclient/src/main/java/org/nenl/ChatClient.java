@@ -40,6 +40,8 @@ public class ChatClient {
 	protected SettingsReaderWriter settingsWorker;
 	protected volatile boolean stopListeningThread = false;
 	
+	static Font font;
+	
 	public static void main(String[] args) {
 		new ChatClient();
 	}
@@ -82,15 +84,17 @@ public class ChatClient {
 
 		display = new Display();
 		shell = new Shell(display);
-		
 		shell.setSize(450, 335);
 		shell.setText("NenlMessenger");
+		
+		font = new Font(display, "Calibri", 11, SWT.NORMAL);
 		
 		scrollingWrapper = new ScrolledComposite(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrollingWrapper.setBounds(10, 41, 414, 189);
 		
 		chatContent = new Composite(scrollingWrapper, SWT.NONE);
 		chatContent.setLayout(new GridLayout(1, true));
+		chatContent.setFont(font);
 		
 		scrollingWrapper.setContent(chatContent);
 		scrollingWrapper.setExpandHorizontal(true);
@@ -98,23 +102,27 @@ public class ChatClient {
 		
 		messageField = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		messageField.setBounds(10, 243, 295, 44);
-		messageField.setFont(new Font(display, "UTF-8", 9, SWT.NORMAL));
+		messageField.setFont(font);
 		
 		sendButton = new Button(shell, SWT.NONE);
 		sendButton.setBounds(311, 262, 113, 25);
 		sendButton.setText("Send Message");
+		sendButton.setFont(font);
 		
 		changeNicknameButton = new Button(shell, SWT.NONE);
-		changeNicknameButton.setBounds(192, 10, 113, 25);
+		changeNicknameButton.setBounds(158, 10, 130, 25);
 		changeNicknameButton.setText("Change Nickname");
+		changeNicknameButton.setFont(font);
 		
 		changeChatroomButton = new Button(shell, SWT.NONE);
-		changeChatroomButton.setBounds(311, 10, 113, 25);
+		changeChatroomButton.setBounds(294, 10, 130, 25);
 		changeChatroomButton.setText("Change Chatroom");
+		changeChatroomButton.setFont(font);
 		
 		chatroomNameLabel = new Label(shell, SWT.WRAP);
-		chatroomNameLabel.setBounds(10, 15, 176, 15);
+		chatroomNameLabel.setBounds(10, 15, 142, 15);
 		chatroomNameLabel.setText("Chatroom name");
+		chatroomNameLabel.setFont(font);
 		
         shell.open();
         
@@ -131,6 +139,10 @@ public class ChatClient {
 				stopListeningThread = true;
 				
 				connectionHandler.disconnect();
+				
+				shell.dispose();
+				
+				font.dispose();
 			}
 		});
 		

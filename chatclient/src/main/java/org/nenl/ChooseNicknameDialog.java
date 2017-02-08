@@ -3,7 +3,6 @@ package org.nenl;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -42,14 +41,16 @@ public class ChooseNicknameDialog extends Dialog {
         Label lblChooseYourNickname = new Label(shell, SWT.NONE);
         lblChooseYourNickname.setBounds(10, 10, 224, 15);
         lblChooseYourNickname.setText("Choose your nickname:");
+    	lblChooseYourNickname.setFont(ChatClient.font);
 
     	Text nicknameField = new Text(shell, SWT.BORDER);
         nicknameField.setBounds(10, 31, 224, 21);
-		nicknameField.setFont(new Font(parent.getDisplay(), "UTF-8", 9, SWT.NORMAL));
+    	nicknameField.setFont(ChatClient.font);
         
         Button chooseNickname = new Button(shell, SWT.NONE);
         chooseNickname.setBounds(159, 56, 75, 25);
         chooseNickname.setText("Proceed");
+    	chooseNickname.setFont(ChatClient.font);
         
         chooseNickname.addListener(SWT.Selection, event -> {
 

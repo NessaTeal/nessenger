@@ -1,7 +1,6 @@
 package org.nenl;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -43,22 +42,26 @@ public class ChooseChatroomDialog extends Dialog {
         Label lblChooseYourChatroom = new Label(shell, SWT.NONE);
         lblChooseYourChatroom.setBounds(10, 10, 224, 15);
         lblChooseYourChatroom.setText("Double click to choose your chatroom:");
+        lblChooseYourChatroom.setFont(ChatClient.font);
         
         Button createChatroom = new Button(shell, SWT.NONE);
         createChatroom.setBounds(159, 271, 75, 25);
         createChatroom.setText("Create");
+        createChatroom.setFont(ChatClient.font);
         
         List chatroomList = new List(shell, SWT.BORDER);
         chatroomList.setBounds(10, 31, 224, 205);
         chatroomList.setItems(chatrooms.toArray(new String[]{}));
+        chatroomList.setFont(ChatClient.font);
         
         Label lblOrCreateNew = new Label(shell, SWT.NONE);
         lblOrCreateNew.setBounds(10, 242, 82, 15);
         lblOrCreateNew.setText("Or create new:");
+        lblOrCreateNew.setFont(ChatClient.font);
 
     	Text newChatroomName = new Text(shell, SWT.BORDER);
         newChatroomName.setBounds(98, 242, 136, 21);
-        newChatroomName.setFont(new Font(parent.getDisplay(), "UTF-8", 9, SWT.NORMAL));
+        newChatroomName.setFont(ChatClient.font);
         
         createChatroom.addListener(SWT.Selection, event -> {
 

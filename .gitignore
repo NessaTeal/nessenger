@@ -51,7 +51,9 @@ chatserver/target/*
 chatclient/target/*
 !chatserver/target/chatserver-1.0-jar-with-dependencies.jar
 !chatclient/target/chatclient-1.0.jar
+nenlchatremover/*
 *.log
 *.prefs
 *.classpath
 *.project
+*.json

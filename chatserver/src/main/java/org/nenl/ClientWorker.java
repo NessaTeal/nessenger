@@ -99,6 +99,13 @@ public class ClientWorker implements Runnable {
 							
 							return;
 							
+						//For now cannot be called from chat client
+						case "removeChatroom":
+							
+							removeChatroom(parsedData);
+							
+							break;
+							
 						default:
 							break;
 					}
@@ -219,5 +226,9 @@ public class ClientWorker implements Runnable {
 		chatrooms.get(chatroomName).addUser(nickname, out);
 		
 		logger.info("User " + nickname + " created and joined chat " + chatroomName);
+	}
+	
+	protected void removeChatroom(JSONObject parsedData) {
+		chatrooms.remove(parsedData.get("chatroomName"));
 	}
 }

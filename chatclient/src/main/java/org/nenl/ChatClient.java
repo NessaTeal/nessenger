@@ -37,6 +37,7 @@ public class ChatClient {
 	protected Button changeChatroomButton;
 	protected Button sendButton;
 	protected Label chatroomNameLabel;
+	protected SettingsReaderWriter settingsWorker;
 	protected volatile boolean stopListeningThread = false;
 	
 	public static void main(String[] args) {
@@ -44,7 +45,6 @@ public class ChatClient {
 	}
 	
 	ChatClient() {
-        
 		initializeGUI();
 		
 		attachListeners();
@@ -53,9 +53,23 @@ public class ChatClient {
 		
 		createMessageListenerThread();
 		
-        chooseNickname(true);
-        
-        chooseOrCreateChat(true);
+		settingsWorker = new SettingsReaderWriter();
+		
+		if(settingsWorker.settingsExist()) {
+			settingsWorker.getSettings();
+			
+			if(settingsWorker.settingExist("nickname")) {
+				connectionHandler.setNickname(settingsWorker.getOneSetting("nickname"));
+			}
+			
+			if(settingsWorker.settingExist("chatroomName")) {
+				connectionHandler.joinChatroom(settingsWorker.getOneSetting("chatroomName"));
+			}
+		} else {
+	        chooseNickname(true);
+	        
+	        chooseOrCreateChat(true);
+		}
 		
         while(!shell.isDisposed()) {
         	if(!display.readAndDispatch()) {
@@ -191,7 +205,7 @@ public class ChatClient {
 					logger.error(e.getMessage());
 				}
 			}
-		}).start();
+		}, "listener").start();
 		
 		logger.info("Listener thread is started.");
 	}
@@ -231,6 +245,8 @@ public class ChatClient {
 		String nickname = new ChooseNicknameDialog(shell, firstLaunch).open();
 		
 		if(nickname != null) {
+			settingsWorker.setOneSetting("nickname", nickname);
+			
 			connectionHandler.setNickname(nickname);
 			
 			logger.info("Nickname is set to " + nickname);
@@ -262,6 +278,8 @@ public class ChatClient {
 				
 				logger.info("Created chat " + chatroomName);
 			}
+			
+			settingsWorker.setOneSetting("chatroomName", chatroomName);
 			
 			chatroomNameLabel.setText(chatroomName);
 			

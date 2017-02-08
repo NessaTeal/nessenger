@@ -26,7 +26,7 @@ class ConnectionHandler {
     protected PrintWriter out;
     protected BufferedReader in;
     protected BufferedReader managementIn;
-    protected volatile boolean stopListenerThread = false;
+    protected volatile boolean stopStreamDividerThread = false;
     
     BufferedReader messageIn;
     
@@ -42,10 +42,10 @@ class ConnectionHandler {
 		
 		logger.info("Connection to server is successful.");
         
-        createListenerThread();
+        createStreamDividerThread();
     }
     
-    protected void createListenerThread() {
+    protected void createStreamDividerThread() {
         new Thread(new Runnable() {
 			public void run() {
 				
@@ -62,7 +62,7 @@ class ConnectionHandler {
 			        PrintWriter managementOut = new PrintWriter(pipeManagementOut, true);
 			        managementIn = new BufferedReader(new InputStreamReader(pipeManagementIn, Charset.forName("UTF-8")));
 					
-					while(!stopListenerThread) {
+					while(!stopStreamDividerThread) {
 						
 						if(!in.ready()) {
 							TimeUnit.MILLISECONDS.sleep(20);
@@ -108,9 +108,9 @@ class ConnectionHandler {
 					logger.error(e.getMessage());
 				}
 			}
-		}).start();
+		}, "stream divider").start();
         
-        logger.info("Listener thread is started");
+        logger.info("Stream divider thread is started");
     }
 
     void disconnect() {
@@ -123,7 +123,7 @@ class ConnectionHandler {
             
             logger.info("Disconnect message is sent");
             
-            stopListenerThread = true;
+            stopStreamDividerThread = true;
             
             socket.shutdownInput();
             socket.shutdownOutput();

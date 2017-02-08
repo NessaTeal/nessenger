@@ -8,15 +8,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class ChooseNicknameDialog extends Dialog {
 	
-	protected String nickname;
+	protected String nickname = null;
+	protected boolean firstLaunch;
 
-	public ChooseNicknameDialog(Shell parent) {
+	public ChooseNicknameDialog(Shell parent, boolean firstLaunch) {
 		super(parent);
+		this.firstLaunch = firstLaunch;
 	}
 	
 	public String open () {
@@ -26,7 +29,14 @@ public class ChooseNicknameDialog extends Dialog {
         shell.setText("Choose your nickname");
         
         shell.addListener(SWT.Close, event -> {
-        	event.doit = false;
+        	if(firstLaunch) {
+        		event.doit = false;
+        		
+        		MessageBox noNicknameChosenDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+    			noNicknameChosenDialog.setText("Nickname required");
+    			noNicknameChosenDialog.setMessage("You should choose nickname.");
+    			noNicknameChosenDialog.open();
+        	}
         });
         
         Label lblChooseYourNickname = new Label(shell, SWT.NONE);

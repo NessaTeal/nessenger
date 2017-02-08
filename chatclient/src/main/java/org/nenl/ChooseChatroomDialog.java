@@ -7,18 +7,20 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class ChooseChatDialog extends Dialog {
+public class ChooseChatroomDialog extends Dialog {
 
-	protected String chatroomName;
-	java.util.List<String> chatrooms;
+	protected String chatroomName = null;
+	protected java.util.List<String> chatrooms;
+	protected boolean firstLaunch;
 	
-	public ChooseChatDialog(Shell parent, java.util.List<String> chatrooms) {
+	public ChooseChatroomDialog(Shell parent, java.util.List<String> chatrooms, boolean firstLaunch) {
 		super(parent);
-		
 		this.chatrooms = chatrooms;
+		this.firstLaunch = firstLaunch;
 	}
 	
 	public String open() {
@@ -28,7 +30,14 @@ public class ChooseChatDialog extends Dialog {
         shell.setText("Choose chat to join");
         
         shell.addListener(SWT.Close, event -> {
-        	event.doit = false;
+        	if(firstLaunch) {
+        		event.doit = false;
+        		
+        		MessageBox noChatroomChosenDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+    			noChatroomChosenDialog.setText("Chatroom required");
+    			noChatroomChosenDialog.setMessage("You should choose chatroom.");
+    			noChatroomChosenDialog.open();
+        	}
         });
         
         Label lblChooseYourChatroom = new Label(shell, SWT.NONE);
@@ -53,9 +62,9 @@ public class ChooseChatDialog extends Dialog {
         
         createChatroom.addListener(SWT.Selection, event -> {
 
-			chatroomName = newChatroomName.getText();
-			
-			if(!chatroomName.equals("")) {
+			if(!newChatroomName.getText().equals("")) {
+				chatroomName = newChatroomName.getText();
+				
 				shell.dispose();
 			}
         });

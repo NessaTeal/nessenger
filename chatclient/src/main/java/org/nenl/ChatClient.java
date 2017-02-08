@@ -53,9 +53,9 @@ public class ChatClient {
 		
 		createMessageListenerThread();
 		
-        chooseNickname();
+        chooseNickname(true);
         
-        chooseOrCreateChat();
+        chooseOrCreateChat(true);
 		
         while(!shell.isDisposed()) {
         	if(!display.readAndDispatch()) {
@@ -126,11 +126,11 @@ public class ChatClient {
 		});
 		
 		changeChatroomButton.addListener(SWT.Selection, event -> {
-			chooseOrCreateChat();
+			chooseOrCreateChat(false);
 		});
 		
 		changeNicknameButton.addListener(SWT.Selection, event -> {
-			chooseNickname();
+			chooseNickname(false);
 		});
 		
 		messageField.addKeyListener(new KeyListener() {
@@ -224,28 +224,32 @@ public class ChatClient {
 		logger.info("New message received.");
 	}
 	
-	protected void chooseNickname() {
+	protected void chooseNickname(boolean firstLaunch) {
 		
 		logger.info("Openning choose nickname dialog");
 
-		String nickname = new ChooseNicknameDialog(shell).open();
+		String nickname = new ChooseNicknameDialog(shell, firstLaunch).open();
 		
-		connectionHandler.setNickname(nickname);
-		
-		logger.info("Nickname is set to " + nickname);
+		if(nickname != null) {
+			connectionHandler.setNickname(nickname);
+			
+			logger.info("Nickname is set to " + nickname);
+		} else {
+			logger.info("User decided to not change nickname");
+		}
 	}
 	
-	protected void chooseOrCreateChat() {
+	protected void chooseOrCreateChat(boolean firstLaunch) {
 		
 		List<String> chatroomList = connectionHandler.getChatroomList();
 		
 		logger.info("Openning choose chatroom dialog");
 				
-		String chatroomName = new ChooseChatDialog(shell, chatroomList).open();
+		String chatroomName = new ChooseChatroomDialog(shell, chatroomList, firstLaunch).open();
 		
-		if(!chatroomName.equals(chatroomNameLabel.getText())) {
+		if(chatroomName != null && !chatroomName.equals(chatroomNameLabel.getText())) {
 
-			if(!chatroomNameLabel.getText().equals("Chatroom name")){
+			if(!firstLaunch) {
 				connectionHandler.quitChatroom();
 			}
 			
@@ -264,6 +268,8 @@ public class ChatClient {
 			for(Control control : chatContent.getChildren()) {
 				control.dispose();
 			}
+		} else {
+			logger.info("User didn't change chatroom");
 		}
 	}
 }

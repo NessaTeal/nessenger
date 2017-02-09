@@ -153,8 +153,10 @@ public class ChatClient {
 		});
 		
 		sendButton.addListener(SWT.Selection, event -> {
-			connectionHandler.sendMessage(messageField.getText());
-			messageField.setText("");
+			if(!messageField.getText().equals("")) {
+				connectionHandler.sendMessage(messageField.getText());
+				messageField.setText("");
+			}
 		});
 		
 		changeChatroomButton.addListener(SWT.Selection, event -> {
@@ -172,9 +174,11 @@ public class ChatClient {
 				if(e.keyCode == SWT.CR) {
 					if(e.stateMask != SWT.SHIFT) {
 						e.doit = false;
-						connectionHandler.sendMessage(messageField.getText());
 						
-						messageField.setText("");
+						if(!messageField.getText().equals("")) {
+							connectionHandler.sendMessage(messageField.getText());
+							messageField.setText("");
+						}
 					}
 				}
 				

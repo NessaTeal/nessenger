@@ -12,19 +12,24 @@ import org.slf4j.LoggerFactory;
 public class ChatServer  {
 	
 	private static Logger logger = LoggerFactory.getLogger(ChatServer.class);
+
+	protected ServerSocket serverSocket;
+	protected Map<String, Chatroom> chatrooms;
+	protected int id = 0;
 	
-	public static void main(String[] args ) throws Exception {
-    	
-    	ServerSocket serverSocket = null;
-    	
-    	Map<String, Chatroom> chatrooms = new HashMap<>();
+	public static void main(String[] args ) {
+		new ChatServer();
+    }
+	
+	ChatServer() {
+		chatrooms = new HashMap<>();
     	
     	chatrooms.put("General", new Chatroom("General"));
     	
     	try {
 			serverSocket = new ServerSocket(61111);
 			
-			logger.info("Socket is created, listening to connects");
+			logger.info("Server socket is created, listening to connects");
 			
 			while(true) {
 				
@@ -33,7 +38,7 @@ public class ChatServer  {
 				try {
 					clientSocket = serverSocket.accept();
 					
-					new Thread(new ClientWorker(clientSocket, chatrooms)).start();
+					new Thread(new OneConnectionWorker(clientSocket, chatrooms, id++)).start();
 					
 					logger.info("Client connected from: " + clientSocket.getInetAddress());
 				} catch (IOException e) {
@@ -44,5 +49,5 @@ public class ChatServer  {
 		catch(IOException e) {
             logger.error("I/O error to open server socker");
 		}
-    }
+	}
 }

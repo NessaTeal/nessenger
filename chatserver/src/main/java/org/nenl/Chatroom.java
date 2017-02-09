@@ -6,9 +6,9 @@ import java.util.Map;
 
 public class Chatroom {
 	
-	String name;
+	protected String name;
 
-	Map<String, PrintWriter> userOutputs;
+	protected Map<Integer, PrintWriter> userOutputs;
 	
 	public Chatroom(String name) {
 		this.name = name;
@@ -16,12 +16,12 @@ public class Chatroom {
 		userOutputs = new HashMap<>();
 	}
 	
-	public void addUser(String userName, PrintWriter out) {
-		userOutputs.put(userName, out);
+	public void addUser(int id, PrintWriter out) {
+		userOutputs.put(id, out);
 	}
 	
-	public void removeUser(String userName) {
-		userOutputs.remove(userName);
+	public void removeUser(int id) {
+		userOutputs.remove(id);
 	}
 	
 	public void writeToChat(String message) {

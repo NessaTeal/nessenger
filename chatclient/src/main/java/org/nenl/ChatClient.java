@@ -9,6 +9,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -83,14 +84,14 @@ public class ChatClient {
 	protected void initializeGUI() {
 
 		display = new Display();
-		shell = new Shell(display);
+		shell = new Shell(display, SWT.MAX | SWT.MIN);
 		shell.setSize(450, 335);
 		shell.setText("NenlMessenger");
 		
 		font = new Font(display, "UTF-8", 11, SWT.NORMAL);
 		
-		scrollingWrapper = new ScrolledComposite(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scrollingWrapper.setBounds(10, 41, 414, 189);
+		scrollingWrapper = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
+		scrollingWrapper.setBounds(10, 41, 424, 189);
 		
 		chatContent = new Composite(scrollingWrapper, SWT.NONE);
 		chatContent.setFont(font);
@@ -99,28 +100,29 @@ public class ChatClient {
 		scrollingWrapper.setContent(chatContent);
 		scrollingWrapper.setExpandHorizontal(true);
 		scrollingWrapper.setExpandVertical(true);
+		scrollingWrapper.setAlwaysShowScrollBars(true);
 		
 		messageField = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		messageField.setBounds(10, 243, 295, 44);
+		messageField.setBounds(10, 243, 305, 44);
 		messageField.setFont(font);
 		
 		sendButton = new Button(shell, SWT.NONE);
-		sendButton.setBounds(311, 262, 113, 25);
+		sendButton.setBounds(321, 243, 113, 44);
 		sendButton.setText("Send Message");
 		sendButton.setFont(font);
 		
 		changeNicknameButton = new Button(shell, SWT.NONE);
-		changeNicknameButton.setBounds(158, 10, 130, 25);
+		changeNicknameButton.setBounds(146, 10, 142, 25);
 		changeNicknameButton.setText("Change Nickname");
 		changeNicknameButton.setFont(font);
 		
 		changeChatroomButton = new Button(shell, SWT.NONE);
-		changeChatroomButton.setBounds(294, 10, 130, 25);
+		changeChatroomButton.setBounds(294, 10, 140, 25);
 		changeChatroomButton.setText("Change Chatroom");
 		changeChatroomButton.setFont(font);
 		
 		chatroomNameLabel = new Label(shell, SWT.WRAP);
-		chatroomNameLabel.setBounds(10, 15, 142, 15);
+		chatroomNameLabel.setBounds(10, 15, 130, 15);
 		chatroomNameLabel.setText("Chatroom name");
 		chatroomNameLabel.setFont(font);
 		
@@ -232,6 +234,8 @@ public class ChatClient {
 				Text newChatMessage;
 				newChatMessage = new Text(chatContent, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 				newChatMessage.setText(line);
+				newChatMessage.setLayoutData(new RowData(398, SWT.DEFAULT));
+				newChatMessage.setEnabled(false);
 				
 				scrollingWrapper.setMinSize(chatContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				

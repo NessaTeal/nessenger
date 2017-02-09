@@ -16,9 +16,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientWorker implements Runnable {
+public class OneConnectionWorker implements Runnable {
 	
-	protected static Logger logger = LoggerFactory.getLogger(ClientWorker.class);
+	protected static Logger logger = LoggerFactory.getLogger(OneConnectionWorker.class);
 	protected static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
 	protected Socket clientSocket;
@@ -26,10 +26,12 @@ public class ClientWorker implements Runnable {
 	protected Map<String, Chatroom> chatrooms;
 	protected String chatroomName;
 	protected PrintWriter out;
+	protected int id;
 	
-	ClientWorker(Socket clientSocket, Map<String, Chatroom> chatrooms) {
+	OneConnectionWorker(Socket clientSocket, Map<String, Chatroom> chatrooms, int id) {
 		this.clientSocket = clientSocket;
 		this.chatrooms = chatrooms;
+		this.id = id;
 	}
 	
 	@Override
@@ -43,10 +45,10 @@ public class ClientWorker implements Runnable {
 			logger.error("Stream is closed");
 			return;
 		}
-
-		String line = "";
 		
 		while(true) {
+			String line;
+			
 			try {
 				if((line = in.readLine()) != null) {
 					
@@ -147,9 +149,9 @@ public class ClientWorker implements Runnable {
 		response.put("message", message);
 		
 		chatrooms.get(chatroomName).writeToChat(response.toString());
-		chatrooms.get(chatroomName).addUser(nickname, out);
+		chatrooms.get(chatroomName).addUser(id, out);
 		
-		logger.info("User" + nickname + " joined chat " + chatroomName);
+		logger.info("User " + nickname + " joined chat " + chatroomName);
 	}
 	
 	protected void quitChatroom(JSONObject parsedData) {
@@ -160,7 +162,7 @@ public class ClientWorker implements Runnable {
 		response.put("type", "message");
 		response.put("message", message);
 
-		chatrooms.get(chatroomName).removeUser(nickname);
+		chatrooms.get(chatroomName).removeUser(id);
 		chatrooms.get(chatroomName).writeToChat(response.toString());
 		
 		logger.info(message + " chat " + chatroomName);
@@ -223,7 +225,7 @@ public class ClientWorker implements Runnable {
 			chatrooms.put(chatroomName, new Chatroom(chatroomName));
 		}
 		
-		chatrooms.get(chatroomName).addUser(nickname, out);
+		chatrooms.get(chatroomName).addUser(id, out);
 		
 		logger.info("User " + nickname + " created and joined chat " + chatroomName);
 	}

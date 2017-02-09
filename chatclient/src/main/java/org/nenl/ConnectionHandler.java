@@ -34,7 +34,7 @@ class ConnectionHandler {
     	
     	//IP address of my server 34.248.239.43
     	
-        socket = new Socket("34.248.239.43", 61111);
+        socket = new Socket("localhost", 61111);
 
         out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -138,7 +138,6 @@ class ConnectionHandler {
             JSONObject connect = new JSONObject();
 
             connect.put("type", "chooseNickname");
-
             connect.put("nickname", nickname);
 
             out.println(connect.toString());
@@ -155,7 +154,6 @@ class ConnectionHandler {
             JSONObject JSONmessage = new JSONObject();
 
             JSONmessage.put("type", "message");
-
             JSONmessage.put("message", message);
 
             out.println(JSONmessage.toString());
@@ -171,7 +169,6 @@ class ConnectionHandler {
             JSONObject message = new JSONObject();
 
             message.put("type", "createChatroom");
-
             message.put("chatroomName", chatroomName);
 
             out.println(message.toString());
@@ -187,7 +184,6 @@ class ConnectionHandler {
             JSONObject message = new JSONObject();
 
             message.put("type", "joinChatroom");
-
             message.put("chatroomName", chatroomName);
 
             out.println(message.toString());
@@ -212,7 +208,7 @@ class ConnectionHandler {
         }
     }
 
-    List<String> getChatroomList() {
+    List<Object> getChatroomList() {
         try {
             JSONObject request = new JSONObject();
 
@@ -223,25 +219,43 @@ class ConnectionHandler {
             logger.info("Chatroom list is requested");
 
             String answer = managementIn.readLine();
-            
             JSONObject response = new JSONObject(answer);
             
             logger.info("Chatroom list is retrieved");
             
             JSONArray chatroomArray = response.getJSONArray("chatrooms");
 
-            List<String> chatroomList = new ArrayList<>();
-
-            for(int i = 0; i < chatroomArray.length(); i++) {
-                chatroomList.add(chatroomArray.getString(i));
-            }
-
-            return chatroomList;
+            return chatroomArray.toList();
 
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
 
-        return new ArrayList<>();
+        //Should never happen as there is always General chatroom
+        
+        return new ArrayList<Object>();
+    }
+    
+    boolean chatroomExists(String chatroomName) {
+    	try {
+            JSONObject request = new JSONObject();
+            
+            request.put("type", "chatroomExist");
+            request.put("chatroomName", chatroomName);
+
+            out.println(request.toString());
+
+            logger.info("Chatroom existance is requested");
+
+            String answer = managementIn.readLine();
+            JSONObject response = new JSONObject(answer);
+            
+            return response.getBoolean("exist");
+    		
+    	} catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    	
+    	return false;
     }
 }

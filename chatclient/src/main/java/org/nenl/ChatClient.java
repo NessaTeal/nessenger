@@ -1,7 +1,9 @@
 package org.nenl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.SWT;
@@ -66,8 +68,10 @@ public class ChatClient {
 			chooseNickname(true);
 		}
 		
-		if(settingsWorker.settingExist("chatroomName")) {
-			connectionHandler.joinChatroom(settingsWorker.getOneSetting("chatroomName"));
+		String chatroomName = settingsWorker.getOneSetting("chatroomName");
+		
+		if(settingsWorker.settingExist("chatroomName") && connectionHandler.chatroomExists(chatroomName)) {
+			connectionHandler.joinChatroom(chatroomName);
 		} else {
 			chooseOrCreateChat(true);
 		}
@@ -269,9 +273,16 @@ public class ChatClient {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void chooseOrCreateChat(boolean firstLaunch) {
 		
-		List<String> chatroomList = connectionHandler.getChatroomList();
+		List<Object> chatroomList = connectionHandler.getChatroomList();
+		
+		List<String> chatroomNames = new ArrayList<>();
+		
+		for(Object chatroomData : chatroomList) {
+			chatroomNames.add(((Map<String, String>)chatroomData).get("chatroomName"));
+		}
 		
 		logger.info("Openning choose chatroom dialog");
 				
@@ -283,14 +294,14 @@ public class ChatClient {
 				connectionHandler.quitChatroom();
 			}
 			
-			if(chatroomList.contains(chatroomName)) {
-				connectionHandler.joinChatroom(chatroomName);
-				
-				logger.info("Connected to chat " + chatroomName);
-			} else {
+			if(!chatroomNames.contains(chatroomName)) {
 				connectionHandler.createChatroom(chatroomName);
 				
 				logger.info("Created chat " + chatroomName);
+			} else {
+				connectionHandler.joinChatroom(chatroomName);
+				
+				logger.info("Connected chat " + chatroomName);
 			}
 			
 			settingsWorker.setOneSetting("chatroomName", chatroomName);

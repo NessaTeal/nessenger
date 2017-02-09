@@ -16,9 +16,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OneConnectionWorker implements Runnable {
+public class OneConnectionRunnable implements Runnable {
 	
-	protected static Logger logger = LoggerFactory.getLogger(OneConnectionWorker.class);
+	protected static Logger logger = LoggerFactory.getLogger(OneConnectionRunnable.class);
 	protected static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
 	protected Socket clientSocket;
@@ -28,7 +28,7 @@ public class OneConnectionWorker implements Runnable {
 	protected PrintWriter out;
 	protected int id;
 	
-	OneConnectionWorker(Socket clientSocket, Map<String, Chatroom> chatrooms, int id) {
+	OneConnectionRunnable(Socket clientSocket, Map<String, Chatroom> chatrooms, int id) {
 		this.clientSocket = clientSocket;
 		this.chatrooms = chatrooms;
 		this.id = id;
@@ -79,13 +79,13 @@ public class OneConnectionWorker implements Runnable {
 							
 						case "quitChatroom":
 							
-							quitChatroom(parsedData);
+							quitChatroom();
 							
 							break;
 							
 						case "getChatroomList":
 							
-							getChatroomList(parsedData);
+							getChatroomList();
 							
 							break;
 							
@@ -97,9 +97,15 @@ public class OneConnectionWorker implements Runnable {
 							
 						case "disconnect":
 							
-							disconnect(parsedData);
+							disconnect();
 							
 							return;
+							
+						case "chatroomExist":
+							
+							chatroomExist(parsedData);
+							
+							break;
 							
 						//For now cannot be called from chat client
 						case "removeChatroom":
@@ -114,6 +120,10 @@ public class OneConnectionWorker implements Runnable {
 				}
 			}
 			catch(IOException e) {
+				
+				//If user suddenly disconnected it is required to remove him from currently connected chat
+				disconnect();
+				
 				e.printStackTrace();
 				return;
 			}
@@ -154,7 +164,7 @@ public class OneConnectionWorker implements Runnable {
 		logger.info("User " + nickname + " joined chat " + chatroomName);
 	}
 	
-	protected void quitChatroom(JSONObject parsedData) {
+	protected void quitChatroom() {
 		
 		JSONObject response = new JSONObject();
 		String message = "User " + nickname + " left";
@@ -170,7 +180,7 @@ public class OneConnectionWorker implements Runnable {
 		chatroomName = null;
 	}
 	
-	protected void disconnect(JSONObject parsedData) throws IOException {
+	protected void disconnect() {
 
 		if(chatroomName != null) {
 			
@@ -180,11 +190,16 @@ public class OneConnectionWorker implements Runnable {
 			response.put("type", "message");
 			response.put("message", message);
 			
+			chatrooms.get(chatroomName).removeUser(id);
 			chatrooms.get(chatroomName).writeToChat(response.toString());
 		}
 		
-		clientSocket.shutdownOutput();
-		clientSocket.shutdownInput();
+		try {
+			clientSocket.shutdownOutput();
+			clientSocket.shutdownInput();
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+		}
 		
 		logger.info("User " + nickname + " disconnects");
 	}
@@ -204,10 +219,20 @@ public class OneConnectionWorker implements Runnable {
 		logger.info("User " + nickname + " in chat " + chatroomName + " wrote message: " + receivedMessage);
 	}
 	
-	protected void getChatroomList(JSONObject parsedData) {
+	protected void getChatroomList() {
 		
 		JSONObject response = new JSONObject();
-		JSONArray chatroomArray = new JSONArray(chatrooms.keySet());
+		JSONArray chatroomArray = new JSONArray();
+		
+		for(Chatroom chatroom : chatrooms.values()) {
+			JSONObject oneChatroom = new JSONObject();
+			
+			oneChatroom.put("chatroomName", chatroom.name);
+			
+			oneChatroom.put("chatroomSize", chatroom.userOutputs.size());
+			
+			chatroomArray.put(oneChatroom);
+		}
 		
 		response.put("type", "management");
 		response.put("chatrooms", chatroomArray);
@@ -228,6 +253,25 @@ public class OneConnectionWorker implements Runnable {
 		chatrooms.get(chatroomName).addUser(id, out);
 		
 		logger.info("User " + nickname + " created and joined chat " + chatroomName);
+	}
+	
+	protected void chatroomExist(JSONObject parsedData) {
+		
+		JSONObject response = new JSONObject();
+
+		response.put("type", "management");
+		
+		chatroomName = parsedData.getString("chatroomName");
+		
+		if(chatrooms.containsKey(chatroomName)) {
+			response.put("exist", true);
+		} else {
+			response.put("exist", false);
+		}
+		
+		out.println(response.toString());
+		
+		logger.info("User " + nickname + " checking if chatroom exists");
 	}
 	
 	protected void removeChatroom(JSONObject parsedData) {

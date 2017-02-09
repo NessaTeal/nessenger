@@ -38,7 +38,7 @@ public class ChatServer  {
 				try {
 					clientSocket = serverSocket.accept();
 					
-					new Thread(new OneConnectionWorker(clientSocket, chatrooms, id++)).start();
+					new Thread(new OneConnectionRunnable(clientSocket, chatrooms, id++)).start();
 					
 					logger.info("Client connected from: " + clientSocket.getInetAddress());
 				} catch (IOException e) {

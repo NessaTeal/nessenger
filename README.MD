@@ -2,7 +2,7 @@ Simple chat messenger with basic functionality. Contains both server and client 
 
 Server by default listen on port 61111.
 
-Client by default will try to connect to my server on 34.248.239.43. (Last updated and checked to be alive February 6, 2017)
+Client by default will try to connect to my server on 34.248.239.43. (Last updated and checked to be alive February 9, 2017)
 
 Server API:
 

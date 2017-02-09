@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
@@ -72,6 +72,8 @@ public class ChatClient {
 		
 		if(settingsWorker.settingExist("chatroomName") && connectionHandler.chatroomExists(chatroomName)) {
 			connectionHandler.joinChatroom(chatroomName);
+			
+			chatroomNameLabel.setText(chatroomName);
 		} else {
 			chooseOrCreateChat(true);
 		}
@@ -163,20 +165,23 @@ public class ChatClient {
 			chooseNickname(false);
 		});
 		
-		messageField.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
+		messageField.addKeyListener(new KeyAdapter() {
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(e.keyCode == SWT.CR) {
-					e.doit = false;
-					connectionHandler.sendMessage(messageField.getText());
-					
-					messageField.setText("");
+					if(e.stateMask != SWT.SHIFT) {
+						e.doit = false;
+						connectionHandler.sendMessage(messageField.getText());
+						
+						messageField.setText("");
+					}
 				}
+				
+				else if (e.stateMask == SWT.CTRL && e.keyCode == 'a') {
+		            messageField.selectAll();
+		            e.doit = false;
+		        }
 			}
 		});
 		

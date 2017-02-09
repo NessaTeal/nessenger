@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -135,6 +137,40 @@ public class ChooseChatroomDialog extends Dialog {
 	        	
 				shell.dispose();
         	}
+        });
+        
+        chatroomTable.addListener(SWT.MouseDoubleClick, event -> {
+        	if(chatroomTable.getSelectionCount() != 0) {
+            	
+				chatroomName = chatroomList.get(chatroomTable.getSelectionIndex());
+				
+				shell.dispose();
+        	} else {
+        		MessageBox noChatroomChosenDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+    			noChatroomChosenDialog.setText("No chatroom is selected");
+    			noChatroomChosenDialog.setMessage("Please choose the chatroom.");
+    			noChatroomChosenDialog.open();
+        	}
+        });
+        
+        chatroomTable.addKeyListener(new KeyAdapter() {
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.keyCode == SWT.CR) {
+					if(chatroomTable.getSelectionCount() != 0) {
+		            	
+						chatroomName = chatroomList.get(chatroomTable.getSelectionIndex());
+						
+						shell.dispose();
+		        	} else {
+		        		MessageBox noChatroomChosenDialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
+		    			noChatroomChosenDialog.setText("No chatroom is selected");
+		    			noChatroomChosenDialog.setMessage("Please choose the chatroom.");
+		    			noChatroomChosenDialog.open();
+		        	}
+				}
+			}
         });
         
         joinChatroomButton.addListener(SWT.Selection, event -> {

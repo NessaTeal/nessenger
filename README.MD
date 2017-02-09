@@ -22,3 +22,5 @@ On points 1, 3, 4, 5 and 7 server responds with JSON with type "message" and "me
 Point 6 produce JSON with type "management" and "chatroomList" contains JSONArray with list.
 
 Multiplatform jar is created using https://github.com/jendap/multiplatform-swt.
+
+Currently OS X requires to be run from command line using "java -XstartOnFirstThread -jar chatclient.jar".

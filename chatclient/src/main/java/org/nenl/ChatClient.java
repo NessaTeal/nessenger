@@ -9,7 +9,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -87,14 +87,14 @@ public class ChatClient {
 		shell.setSize(450, 335);
 		shell.setText("NenlMessenger");
 		
-		font = new Font(display, "Calibri", 11, SWT.NORMAL);
+		font = new Font(display, "UTF-8", 11, SWT.NORMAL);
 		
 		scrollingWrapper = new ScrolledComposite(shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrollingWrapper.setBounds(10, 41, 414, 189);
 		
 		chatContent = new Composite(scrollingWrapper, SWT.NONE);
-		chatContent.setLayout(new GridLayout(1, true));
 		chatContent.setFont(font);
+		chatContent.setLayout(new RowLayout(SWT.VERTICAL));
 		
 		scrollingWrapper.setContent(chatContent);
 		scrollingWrapper.setExpandHorizontal(true);
@@ -235,7 +235,7 @@ public class ChatClient {
 				
 				scrollingWrapper.setMinSize(chatContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				
-				//If users currently looks at bottom of chat then scroll to the bottom
+				//If users currently looks at bottom or almost bottom of chat then scroll to the bottom
 				
 				if(chatContent.getSize().y - scrollingWrapper.getOrigin().y - scrollingWrapper.getSize().y <= 100) {
 				

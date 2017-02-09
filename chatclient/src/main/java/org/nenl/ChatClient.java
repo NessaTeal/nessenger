@@ -48,7 +48,7 @@ public class ChatClient {
 	}
 	
 	ChatClient() {
-		initializeGUI();
+		initializeGraphics();
 		
 		attachListeners();
 		
@@ -58,20 +58,18 @@ public class ChatClient {
 		
 		settingsWorker = new SettingsReaderWriter();
 		
-		if(settingsWorker.settingsExist()) {
-			settingsWorker.getSettings();
-			
-			if(settingsWorker.settingExist("nickname")) {
-				connectionHandler.setNickname(settingsWorker.getOneSetting("nickname"));
-			}
-			
-			if(settingsWorker.settingExist("chatroomName")) {
-				connectionHandler.joinChatroom(settingsWorker.getOneSetting("chatroomName"));
-			}
+		settingsWorker.getSettings();
+		
+		if(settingsWorker.settingExist("nickname")) {
+			connectionHandler.setNickname(settingsWorker.getOneSetting("nickname"));
 		} else {
-	        chooseNickname(true);
-	        
-	        chooseOrCreateChat(true);
+			chooseNickname(true);
+		}
+		
+		if(settingsWorker.settingExist("chatroomName")) {
+			connectionHandler.joinChatroom(settingsWorker.getOneSetting("chatroomName"));
+		} else {
+			chooseOrCreateChat(true);
 		}
 		
         while(!shell.isDisposed()) {
@@ -81,14 +79,14 @@ public class ChatClient {
         }
 	}
 	
-	protected void initializeGUI() {
+	protected void initializeGraphics() {
 
 		display = new Display();
 		shell = new Shell(display, SWT.MAX | SWT.MIN);
 		shell.setSize(450, 335);
 		shell.setText("NenlMessenger");
 		
-		font = new Font(display, "UTF-8", 11, SWT.NORMAL);
+		font = new Font(display, "Segoe UI", 9, SWT.NORMAL);
 		
 		scrollingWrapper = new ScrolledComposite(shell, SWT.BORDER | SWT.V_SCROLL);
 		scrollingWrapper.setBounds(10, 41, 424, 189);
@@ -178,7 +176,7 @@ public class ChatClient {
 			}
 		});
 		
-		logger.info("Listeners are attached.");
+		logger.info("Listeners are attached");
 	}
 	
 	protected void connectToServer() {
@@ -221,7 +219,7 @@ public class ChatClient {
 			}
 		}, "listener").start();
 		
-		logger.info("Listener thread is started.");
+		logger.info("Listener thread is started");
 	}
 	
 	protected void createChatMessage(String line) {
@@ -251,7 +249,7 @@ public class ChatClient {
 			
 		});
 		
-		logger.info("New message received.");
+		logger.info("New message received");
 	}
 	
 	protected void chooseNickname(boolean firstLaunch) {

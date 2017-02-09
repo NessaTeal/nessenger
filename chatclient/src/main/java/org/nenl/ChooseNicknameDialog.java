@@ -15,18 +15,63 @@ public class ChooseNicknameDialog extends Dialog {
 	
 	protected String nickname = null;
 	protected boolean firstLaunch;
+	
+	protected Shell shell;
+    protected Display display;
+	protected Text nicknameField;
+	protected Button chooseNicknameButton;
+	private Button btnCancel;
 
 	public ChooseNicknameDialog(Shell parent, boolean firstLaunch) {
 		super(parent);
 		this.firstLaunch = firstLaunch;
+		
+        shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+        display = parent.getDisplay();
+        
+		initializeGraphics();
+		
+		attachListeners();
 	}
 	
 	public String open () {
-        Shell parent = getParent();
-        Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        shell.setSize(250, 119);
+		shell.open();
+        
+        while (!shell.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                	display.sleep();
+                }
+        }
+        
+        return nickname;
+	}
+	
+	protected void initializeGraphics() {
+        shell.setSize(188, 119);
         shell.setText("Choose your nickname");
         
+        Label chooseYourNicknameLabel = new Label(shell, SWT.NONE);
+        chooseYourNicknameLabel.setBounds(10, 10, 162, 15);
+        chooseYourNicknameLabel.setText("Choose your nickname:");
+    	chooseYourNicknameLabel.setFont(ChatClient.font);
+
+    	nicknameField = new Text(shell, SWT.BORDER);
+        nicknameField.setBounds(10, 31, 163, 21);
+    	nicknameField.setFont(ChatClient.font);
+        
+        chooseNicknameButton = new Button(shell, SWT.NONE);
+        chooseNicknameButton.setBounds(98, 56, 75, 25);
+        chooseNicknameButton.setText("Choose");
+    	chooseNicknameButton.setFont(ChatClient.font);
+    	
+    	if(!firstLaunch) {
+	    	btnCancel = new Button(shell, SWT.NONE);
+	    	btnCancel.setBounds(10, 56, 75, 25);
+	    	btnCancel.setText("Cancel");
+    	}
+	}
+	
+	protected void attachListeners() {
         shell.addListener(SWT.Close, event -> {
         	if(firstLaunch) {
         		event.doit = false;
@@ -38,21 +83,7 @@ public class ChooseNicknameDialog extends Dialog {
         	}
         });
         
-        Label lblChooseYourNickname = new Label(shell, SWT.NONE);
-        lblChooseYourNickname.setBounds(10, 10, 224, 15);
-        lblChooseYourNickname.setText("Choose your nickname:");
-    	lblChooseYourNickname.setFont(ChatClient.font);
-
-    	Text nicknameField = new Text(shell, SWT.BORDER);
-        nicknameField.setBounds(10, 31, 224, 21);
-    	nicknameField.setFont(ChatClient.font);
-        
-        Button chooseNickname = new Button(shell, SWT.NONE);
-        chooseNickname.setBounds(159, 56, 75, 25);
-        chooseNickname.setText("Proceed");
-    	chooseNickname.setFont(ChatClient.font);
-        
-        chooseNickname.addListener(SWT.Selection, event -> {
+        chooseNicknameButton.addListener(SWT.Selection, event -> {
 
 			nickname = nicknameField.getText();
 			
@@ -76,14 +107,10 @@ public class ChooseNicknameDialog extends Dialog {
 			}
 		});
         
-        shell.open();
-        Display display = parent.getDisplay();
-        while (!shell.isDisposed()) {
-                if (!display.readAndDispatch()) {
-                	display.sleep();
-                }
+        if(!firstLaunch) {
+        	btnCancel.addListener(SWT.Selection, event -> {
+        		shell.dispose();
+        	});
         }
-        
-        return nickname;
 	}
 }

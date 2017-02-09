@@ -22,10 +22,6 @@ public class SettingsReaderWriter {
 		settings = new JSONObject();
 	}
 	
-	boolean settingsExist() {
-		return file.exists();
-	}
-	
 	void getSettings() {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -40,11 +36,10 @@ public class SettingsReaderWriter {
 			
 			reader.close();
 		} catch (FileNotFoundException e) {
-			//Should never occur
+			logger.info("Settings do not exist");
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
-		
 	}
 	
 	void setOneSetting(String key, String value) {

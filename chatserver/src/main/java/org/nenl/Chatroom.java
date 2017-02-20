@@ -1,32 +1,29 @@
 package org.nenl;
 
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.java_websocket.WebSocket;
 
 public class Chatroom {
 	
-	protected String name;
-
-	protected Map<Integer, PrintWriter> userOutputs;
+	protected List<WebSocket> userOutputs;
 	
-	public Chatroom(String name) {
-		this.name = name;
-		
-		userOutputs = new HashMap<>();
+	public Chatroom() {
+		userOutputs = new ArrayList<>();
 	}
 	
-	public void addUser(int id, PrintWriter out) {
-		userOutputs.put(id, out);
+	public void addUser(WebSocket ws) {
+		userOutputs.add(ws);
 	}
 	
-	public void removeUser(int id) {
-		userOutputs.remove(id);
+	public void removeUser(WebSocket ws) {
+		userOutputs.remove(ws);
 	}
 	
 	public void writeToChat(String message) {
-		for(PrintWriter out : userOutputs.values()) {
-			out.println(message);
+		for(WebSocket ws : userOutputs) {
+			ws.send(message);
 		}
 	}
 }

@@ -1,6 +1,8 @@
 Simple chat messenger with basic functionality. Contains both server and client implementations.
 
-Server by default listen on port 61111.
+CURRENTLY DESKTOP VERSION IS NOT WORKING. USE WEB VERSION FOUND ON vadimjprokopev.github.io/nenlmessenger
+
+Server by default listen on port 80.
 
 Client by default will try to connect to my server on 34.248.239.43. (Last updated and checked to be alive February 9, 2017)
 

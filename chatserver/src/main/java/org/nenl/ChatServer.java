@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bson.Document;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -15,21 +16,39 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+
 public class ChatServer extends WebSocketServer {
 
 	private static Logger logger = LoggerFactory.getLogger(ChatServer.class); 
 
 	protected Map<String, Chatroom> chatrooms;
 	protected Map<WebSocket, User> users;
+	protected MongoCollection<Document> mongoCollection;
 	
 	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 	
 	public static void main(String args[]) {
-		new ChatServer(new InetSocketAddress(80)).start();
+		
+		ChatServer chatServer = new ChatServer(new InetSocketAddress(61111));
+		
+		chatServer.start();
+		
+		logger.info("Server started, listening to connects");
 	}
 	
 	public ChatServer(InetSocketAddress address) {
 		super(address);
+		
+		@SuppressWarnings("resource")
+		MongoClient mongoClient = new MongoClient();
+		
+		MongoDatabase mongoDatabase = mongoClient.getDatabase("allChatMessages");
+		
+		mongoCollection = mongoDatabase.getCollection("messages");
 		
 		chatrooms = new HashMap<>();
 		chatrooms.put("General", new Chatroom());
@@ -101,7 +120,6 @@ public class ChatServer extends WebSocketServer {
 				chatroomExist(ws, parsedData);
 				
 				break;
-				
 			//For now cannot be called from chat client
 			case "removeChatroom":
 				
@@ -157,7 +175,9 @@ public class ChatServer extends WebSocketServer {
 		
 		User user = users.get(ws);
 		
-		user.chatroomName = parsedData.getString("chatroomName");
+		String chatroomName = parsedData.getString("chatroomName");
+		
+		user.chatroomName = chatroomName;
 		
 		JSONObject response = new JSONObject();
 		String message = "User " + user.nickname + " joins chat.";
@@ -165,15 +185,18 @@ public class ChatServer extends WebSocketServer {
 		response.put("type", "message");
 		response.put("message", message);
 		response.put("origin", "Server");
+		response.put("chatroomName", user.chatroomName);
 
 		Date date = Calendar.getInstance().getTime();
 		String dateString = "[" + sdf.format(date) + "]";
 		response.put("date", dateString);
 		
-		chatrooms.get(user.chatroomName).writeToChat(response.toString());
-		chatrooms.get(user.chatroomName).addUser(ws);
+		chatrooms.get(chatroomName).writeToChat(response.toString());
+		chatrooms.get(chatroomName).addUser(ws);
 		
-		logger.info("User " + user.nickname + " joined chat " + user.chatroomName);
+		getPreviousMessages(ws, chatroomName);
+		
+		logger.info("User " + user.nickname + " joined chat " + chatroomName);
 	}
 	
 	protected void quitChatroom(WebSocket ws, JSONObject parsedData) {
@@ -186,6 +209,7 @@ public class ChatServer extends WebSocketServer {
 		response.put("type", "message");
 		response.put("message", message);
 		response.put("origin", "Server");
+		response.put("chatroomName", user.chatroomName);
 
 		Date date = Calendar.getInstance().getTime();
 		String dateString = "[" + sdf.format(date) + "]";
@@ -211,6 +235,7 @@ public class ChatServer extends WebSocketServer {
 			response.put("type", "message");
 			response.put("message", message);
 			response.put("origin", "Server");
+			response.put("chatroomName", user.chatroomName);
 
 			Date date = Calendar.getInstance().getTime();
 			String dateString = "[" + sdf.format(date) + "]";
@@ -218,6 +243,8 @@ public class ChatServer extends WebSocketServer {
 			
 			chatrooms.get(user.chatroomName).removeUser(ws);
 			chatrooms.get(user.chatroomName).writeToChat(response.toString());
+			
+			users.remove(ws);
 		}
 		
 		logger.info("User " + user.nickname + " disconnects");
@@ -233,12 +260,15 @@ public class ChatServer extends WebSocketServer {
 		response.put("type", "message");
 		response.put("message", receivedMessage);
 		response.put("origin", user.nickname);
+		response.put("chatroomName", user.chatroomName);
 
 		Date date = Calendar.getInstance().getTime();
 		String dateString = "[" + sdf.format(date) + "]";
 		response.put("date", dateString);
 		
 		chatrooms.get(user.chatroomName).writeToChat(response.toString());
+		
+		mongoCollection.insertOne(Document.parse(response.toString()));
 		
 		logger.info("User " + user.nickname + " in chat " + user.chatroomName + " wrote message: " + receivedMessage);
 	}
@@ -300,6 +330,12 @@ public class ChatServer extends WebSocketServer {
 		ws.send(response.toString());
 		
 		logger.info("User " + user.nickname + " checking if chatroom exists");
+	}
+	
+	protected void getPreviousMessages(WebSocket ws, String chatroomName) {
+		for(Document oneMessage : mongoCollection.find(Filters.eq("chatroomName", chatroomName))) {
+			ws.send(oneMessage.toJson());
+		}
 	}
 	
 	protected void removeChatroom(JSONObject parsedData) {

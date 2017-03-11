@@ -1,4 +1,4 @@
-var socket = new WebSocket("ws://nenlmessenger.tk:61111");
+var socket = new WebSocket("ws://nenlmessenger.tk/chatserver");
 
 var globalChatroomName;
 

@@ -1,9 +1,6 @@
 package org.nenl;
 
 import java.net.InetSocketAddress;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +24,8 @@ public class ChatServer extends WebSocketServer {
 
 	protected Map<String, Chatroom> chatrooms;
 	protected Map<WebSocket, User> users;
-	protected MongoCollection<Document> mongoCollection;
-	
-	private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+	protected MongoCollection<Document> messageCollection;
+	protected MongoCollection<Document> chatroomCollection;
 	
 	public static void main(String args[]) {
 		
@@ -40,20 +36,15 @@ public class ChatServer extends WebSocketServer {
 		logger.info("Server started, listening to connects");
 	}
 	
-	public ChatServer(InetSocketAddress address) {
+	protected ChatServer(InetSocketAddress address) {
 		super(address);
 		
-		@SuppressWarnings("resource")
-		MongoClient mongoClient = new MongoClient();
-		
-		MongoDatabase mongoDatabase = mongoClient.getDatabase("allChatMessages");
-		
-		mongoCollection = mongoDatabase.getCollection("messages");
-		
 		chatrooms = new HashMap<>();
-		chatrooms.put("General", new Chatroom());
-		
 		users = new HashMap<>();
+		
+		connectToDB();
+		retrieveChatrooms();
+		startDatabaseCleanerDaemon();
 	}
 
 	@Override
@@ -142,8 +133,32 @@ public class ChatServer extends WebSocketServer {
 	}
 
 	@Override
-	public void onError(WebSocket arg0, Exception e) {
+	public void onError(WebSocket ws, Exception e) {
 		logger.error(e.getMessage());
+	}
+
+	@SuppressWarnings("resource")
+	protected void connectToDB() {
+		MongoClient mongoClient = new MongoClient();
+		
+		MongoDatabase mongoDatabase = mongoClient.getDatabase("chatDatabase");
+		
+		messageCollection = mongoDatabase.getCollection("messages");
+		chatroomCollection = mongoDatabase.getCollection("chatrooms");
+	}
+
+	protected void retrieveChatrooms() {
+		for(Document chatroom : messageCollection.find()) {
+			chatrooms.put(chatroom.getString("chatroomName"), new Chatroom());
+		}
+	}
+	
+	protected void startDatabaseCleanerDaemon() {
+		Thread databaseCleanerDaemon = new Thread(new DatabaseCleanerDaemon(messageCollection), "DatabaseCleanerDaemon");
+		
+		databaseCleanerDaemon.setDaemon(true);
+		
+		databaseCleanerDaemon.start();
 	}
 	
 	protected void chooseNickname(WebSocket ws, JSONObject parsedData) {
@@ -158,10 +173,7 @@ public class ChatServer extends WebSocketServer {
 			response.put("type", "message");
 			response.put("message", changeNickname);
 			response.put("origin", "Server");
-
-			Date date = Calendar.getInstance().getTime();
-			String dateString = "[" + sdf.format(date) + "]";
-			response.put("date", dateString);
+			response.put("date", System.currentTimeMillis());
 			
 			chatrooms.get(user.chatroomName).writeToChat(response.toString());
 		}
@@ -186,10 +198,7 @@ public class ChatServer extends WebSocketServer {
 		response.put("message", message);
 		response.put("origin", "Server");
 		response.put("chatroomName", user.chatroomName);
-
-		Date date = Calendar.getInstance().getTime();
-		String dateString = "[" + sdf.format(date) + "]";
-		response.put("date", dateString);
+		response.put("date", System.currentTimeMillis());
 		
 		chatrooms.get(chatroomName).writeToChat(response.toString());
 		chatrooms.get(chatroomName).addUser(ws);
@@ -210,10 +219,7 @@ public class ChatServer extends WebSocketServer {
 		response.put("message", message);
 		response.put("origin", "Server");
 		response.put("chatroomName", user.chatroomName);
-
-		Date date = Calendar.getInstance().getTime();
-		String dateString = "[" + sdf.format(date) + "]";
-		response.put("date", dateString);
+		response.put("date", System.currentTimeMillis());
 
 		chatrooms.get(user.chatroomName).removeUser(ws);
 		chatrooms.get(user.chatroomName).writeToChat(response.toString());
@@ -236,10 +242,7 @@ public class ChatServer extends WebSocketServer {
 			response.put("message", message);
 			response.put("origin", "Server");
 			response.put("chatroomName", user.chatroomName);
-
-			Date date = Calendar.getInstance().getTime();
-			String dateString = "[" + sdf.format(date) + "]";
-			response.put("date", dateString);
+			response.put("date", System.currentTimeMillis());
 			
 			chatrooms.get(user.chatroomName).removeUser(ws);
 			chatrooms.get(user.chatroomName).writeToChat(response.toString());
@@ -261,14 +264,11 @@ public class ChatServer extends WebSocketServer {
 		response.put("message", receivedMessage);
 		response.put("origin", user.nickname);
 		response.put("chatroomName", user.chatroomName);
-
-		Date date = Calendar.getInstance().getTime();
-		String dateString = "[" + sdf.format(date) + "]";
-		response.put("date", dateString);
+		response.put("date", System.currentTimeMillis());
 		
 		chatrooms.get(user.chatroomName).writeToChat(response.toString());
 		
-		mongoCollection.insertOne(Document.parse(response.toString()));
+		messageCollection.insertOne(Document.parse(response.toString()));
 		
 		logger.info("User " + user.nickname + " in chat " + user.chatroomName + " wrote message: " + receivedMessage);
 	}
@@ -298,12 +298,17 @@ public class ChatServer extends WebSocketServer {
 	
 	protected void createChatroom(WebSocket ws, JSONObject parsedData) {
 
+		String chatroomName = parsedData.getString("chatroomName");
+		
 		User user = users.get(ws);
+		user.chatroomName = chatroomName;
 		
-		user.chatroomName = parsedData.getString("chatroomName");
-		
-		if(!chatrooms.containsKey(user.chatroomName)) {
-			chatrooms.put(user.chatroomName, new Chatroom());
+		if(!chatrooms.containsKey(chatroomName)) {
+			chatrooms.put(chatroomName, new Chatroom());
+			
+			Document chatroom = new Document("chatroomName", chatroomName);
+			
+			chatroomCollection.insertOne(chatroom);
 		}
 		
 		chatrooms.get(user.chatroomName).addUser(ws);
@@ -333,12 +338,16 @@ public class ChatServer extends WebSocketServer {
 	}
 	
 	protected void getPreviousMessages(WebSocket ws, String chatroomName) {
-		for(Document oneMessage : mongoCollection.find(Filters.eq("chatroomName", chatroomName))) {
-			ws.send(oneMessage.toJson());
+		for(Document message : messageCollection.find(Filters.eq("chatroomName", chatroomName))) {
+			ws.send(message.toJson());
 		}
 	}
 	
 	protected void removeChatroom(JSONObject parsedData) {
-		chatrooms.remove(parsedData.get("chatroomName"));
+		
+		String chatroomName = parsedData.getString("chatroomName");
+		
+		chatroomCollection.deleteOne(Filters.eq("chatroomName", chatroomName));
+		chatrooms.remove(chatroomName);
 	}
 }

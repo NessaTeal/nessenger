@@ -109,6 +109,7 @@ function goToChatPage() {
 
 function createNewChatroom() {
 
+	if(globalChatroomName != undefined) {
 		var message = {};
 
 		message.type = "quitChatroom";

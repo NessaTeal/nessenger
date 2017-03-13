@@ -1,0 +1,42 @@
+{namespace templates}
+
+/**
+ * Template for one message.
+ * @param origin Who sent the message.
+ * @param date Date of sending message.
+ * @param message Message text.
+ */
+{template .message}
+	<div class="list-group-item list-group-item-action flex-column align-items-start">
+		<div class="d-flex w-100 justify-content-between">
+			<h5 class="mb-1">
+				{$origin}
+			</h5>
+			<small>
+				{$date}
+			</small>
+		</div>
+		<p class="mb-1">
+			{$message}
+		</p>
+	</div>
+{/template}
+
+/**	
+ * Template for chatroom in chatroom list.
+ * @param chatroomID ID of the chatroom used as hook for onclick event.
+ * @param chatroomName Name of the chatroom.
+ * @param chatroomSize Current amount of people in chatroom.
+ */
+{template .chatroom}
+	<a class="list-group-item list-group-item-action flex-column align-items-start" id="chatroom{$chatroomID}" chatroomName="{$chatroomName}">
+		<div class="d-flex w-100 justify-content-between">
+			<h5 class="mb-1">
+				{$chatroomName}
+			</h5>
+			<small>
+				{$chatroomSize}
+			</small>
+		</div>
+	</a>
+{/template}

@@ -1,59 +1,8 @@
-var socket = new WebSocket("ws://nenlmessenger.tk/chatserver");
+var socket;
+
+var globalNickname;
 
 var globalChatroomName;
-
-socket.onerror = function () {
-
-	alert("Error connecting to server, please try later.")
-}
-
-socket.onmessage = function (event) {
-
-	var response = JSON.parse(event.data);
-
-	if(response.type == "chatroomList") {
-		$("#chatrooms").html("");
-		var chatroomZerothPart  = '<a class="list-group-item list-group-item-action flex-column align-items-start" id="chatroom';
-		var chatroomFirstPart  = '" chatroomName="';
-		var chatroomSecondPart = '"><div class="d-flex w-100 justify-content-between"><h5 class="mb-1">';
-		var chatroomThirdPart  = '</h5><small>';
-		var chatroomFourthPart = '</small></div></a>';
-		
-		for (var i = response.chatrooms.length - 1; i >= 0; i--) {
-
-			var chatroomName = response.chatrooms[i].chatroomName;
-			
-			var oneChatroom = chatroomZerothPart + i + chatroomFirstPart + chatroomName + chatroomSecondPart + chatroomName + chatroomThirdPart + response.chatrooms[i].chatroomSize + chatroomFourthPart;
-
-			$("#chatrooms").append(oneChatroom);
-			
-			$("#chatroom" + i).click(function(e){
-				var newChatroomName = e.currentTarget.attributes[2].value;
-
-				if(newChatroomName != globalChatroomName) {
-					chooseChatroom(e.currentTarget.attributes[2].value);
-				}
-				return false;
-			});
-		}
-
-	} else {
-		var messageFirstPart  = '<div class="list-group-item list-group-item-action flex-column align-items-start"><div class="d-flex w-100 justify-content-between"><h5 class="mb-1">';
-		var messageSecondPart = '</h5><small>';
-		var messageThirdPart  = '</small></div><p class="mb-1">';
-		var messageFourthPart = '</p></div>';
-
-		var date = new Date(parseInt(response.date.$numberLong));
-
-		var dateString = "[" + date.getHours() + ":" + date.getMinutes() + "]";
-
-		$("#chat").append(messageFirstPart + response.origin + messageSecondPart + dateString + messageThirdPart + response.message + messageFourthPart);
-
-		if($(document).height() - window.scrollY - screen.height <= 300) {
-			window.scrollTo(window.scrollX, $(document).height());
-		}
-	}
-}
 
 function sendMessage() {
 
@@ -75,17 +24,14 @@ function goToChooseChatPageFromLoginPage() {
 	$("#chooseNicknamePage").css("display", "none");
 
 	$("#chooseNicknameBtn").prop("onclick", null);
+
 	$("#chooseNicknameBtn").click(function(e) {
 		goToChatPageFromChooseNicknamePage();
 	});
 
-	var message = {};
+	globalNickname = $("#nickname").val();
 
-	message.type = "chooseNickname";
-
-	message.nickname = $("#nickname").val();
-
-	socket.send(JSON.stringify(message));
+	setNickname(globalNickname);
 
 	goToChooseChatPage();
 }
@@ -93,12 +39,6 @@ function goToChooseChatPageFromLoginPage() {
 function goToChooseChatPageFromChatPage() {
 
 	$("#chatPage").css("display", "none");
-
-	var message = {};
-
-	message.type = "quitChatroom";
-
-	socket.send(JSON.stringify(message));
 
 	goToChooseChatPage();
 }
@@ -142,15 +82,22 @@ function goToChatPageFromChooseNicknamePage() {
 
 	$("#chooseNicknamePage").css("display", "none");
 
+	globalNickname = $("#nickname").val();
+
+	setNickname(globalNickname);
+
+	goToChatPage();
+}
+
+function setNickname(nickname) {
+
 	var message = {};
 
 	message.type = "chooseNickname";
 
-	message.nickname = $("#nickname").val();
+	message.nickname = nickname;
 
 	socket.send(JSON.stringify(message));
-
-	goToChatPage();
 }
 
 function goToChatPage() {
@@ -161,6 +108,13 @@ function goToChatPage() {
 }
 
 function createNewChatroom() {
+
+		var message = {};
+
+		message.type = "quitChatroom";
+
+		socket.send(JSON.stringify(message));
+	}
 
 	$("#chooseChatPage").css("display", "none");
 
@@ -176,6 +130,85 @@ function createNewChatroom() {
 }
 
 $(document).ready(function() {
+	socket = new WebSocket("ws://nenlmessenger.tk/chatserver");
+
+	socket.onerror = function () {
+
+		alert("Error connecting to server, please try later.")
+	}
+
+	socket.onmessage = function (event) {
+
+		var response = JSON.parse(event.data);
+
+		if(response.type == "chatroomList") {
+			$("#chatrooms").html("");
+			
+			for (var i = response.chatrooms.length - 1; i >= 0; i--) {
+
+				var chatroomName = response.chatrooms[i].chatroomName;
+				
+				var oneChatroom = templates.chatroom({'chatroomID':i,'chatroomName':chatroomName,'chatroomSize':response.chatrooms[i].chatroomSize});
+
+				$("#chatrooms").append(oneChatroom);
+
+				$("#chatroom" + i).click(function(e){
+					var newChatroomName = e.currentTarget.attributes[2].value;
+
+					if(newChatroomName != globalChatroomName) {
+						var message = {};
+
+						message.type = "quitChatroom";
+
+						socket.send(JSON.stringify(message));
+
+						chooseChatroom(e.currentTarget.attributes[2].value);
+					} else {
+
+						$("#chooseChatPage").css("display", "none");
+
+						goToChatPage();
+					}
+
+					return false;
+				});
+			}
+
+		} else {
+
+			var date;
+
+			//Current workaround that MongoDB stores long in weird manner
+			if(isNaN(response.date)) {
+
+				var date = new Date(parseInt(response.date.$numberLong));
+
+			} else {
+
+				var date = new Date(response.date);
+
+			}
+
+			var dateString = date.getDate() + "/" + (date.getMonth() + 1) + " [" + date.getHours() + ":" + ('0' + date.getMinutes()).slice(-2) + "]";
+
+			$("#chat").append(templates.message({'origin':response.origin,'date':dateString,'message':response.message}));
+
+			if($(document).height() - window.scrollY - screen.height <= 300) {
+				window.scrollTo(window.scrollX, $(document).height());
+			}
+		}
+	}
+
+	$(window).focus(function() {
+		if(socket.readyState == WebSocket.CLOSED || socket.readyState == WebSocket.CLOSING) {
+			socket = new WebSocket("ws://nenlmessenger.tk/chatserver");
+
+			setNickname(globalNickname);
+
+			joinChatroom(globalChatroomName);
+		}  
+	});
+
 	$("#nickname").keydown(function(e) {
 		var keyCode = e.which;
 

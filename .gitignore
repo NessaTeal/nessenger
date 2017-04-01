@@ -57,3 +57,6 @@ nenlchatremover/*
 *.classpath
 *.project
 *.json
+chatclient-web-old/templates/SoyToJsSrcCompiler.jar
+chatclient-web-old/templates/soyutils.js
+chatclient-web/README.md

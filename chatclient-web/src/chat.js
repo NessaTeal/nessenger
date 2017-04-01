@@ -1,0 +1,75 @@
+export class Chat {
+	constructor(onMessage) {
+		this.socket = new WebSocket("ws://nenlmessenger.tk/chatserver");
+
+		this.socket.onerror = function () {
+			alert("Error connecting to server, please try later.")
+		}
+
+		this.socket.onmessage = function (event) {
+
+			const response = JSON.parse(event.data);
+
+			if(response.type === "chatroomList") {
+
+				let chatroomList = [];
+
+				for (let i = 0; i < response.chatrooms.length; i++) {
+
+					chatroomList.push({'chatroomID':i,
+						'chatroomName':response.chatrooms[i].chatroomName,
+						'chatroomSize':response.chatrooms[i].chatroomSize});
+				}
+
+				onMessage({'type':'getChatroomList', chatroomList:chatroomList});
+
+			} else {
+
+				let date;
+
+		        //Current workaround that MongoDB stores long in weird manner
+		        if(isNaN(response.date)) {
+
+		        	date = new Date(parseInt(response.date.$numberLong, 0));
+
+		        } else {
+
+		        	date = new Date(response.date);
+
+		        }
+
+		        const dateString = date.getDate() + "/" + (date.getMonth() + 1) + " [" + date.getHours() + ":" + ('0' + date.getMinutes()).slice(-2) + "]";
+
+		        onMessage({'type':'message',
+		        	'message': {
+		        	'origin':response.origin,
+		        	'date':dateString,
+		        	'message':response.message}});
+		    }
+		}
+	}
+
+	chooseNickname(nickname) {
+		this.socket.send(JSON.stringify({'type':'chooseNickname','nickname':nickname}));
+	}
+
+	getChatroomList() {
+		this.socket.send(JSON.stringify({'type':'getChatroomList'}));
+	}
+
+	sendMessage(message) {
+		this.socket.send(JSON.stringify({'type':'message', 'message':message}));
+	}
+
+	createChatroom(chatroomName) {
+		this.socket.send(JSON.stringify({'type':'createChatroom', 'chatroomName':chatroomName}));
+	}
+
+	joinChatroom(chatroomName) {
+		this.socket.send(JSON.stringify({'type':'joinChatroom', 'chatroomName':chatroomName}));
+	}
+
+	quitChatroom() {
+		this.socket.send(JSON.stringify({'type':'quitChatroom'}));
+	}	
+}

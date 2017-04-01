@@ -23,7 +23,12 @@ public class Chatroom {
 	
 	public void writeToChat(String message) {
 		for(WebSocket ws : userOutputs) {
-			ws.send(message);
+			try {
+				ws.send(message);
+			}
+			catch(Exception e) {
+				removeUser(ws);
+			}
 		}
 	}
 }

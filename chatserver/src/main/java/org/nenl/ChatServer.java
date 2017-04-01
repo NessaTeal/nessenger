@@ -165,7 +165,7 @@ public class ChatServer extends WebSocketServer {
 		
 		User user = users.get(ws);
 
-		if(user.nickname != null && user.chatroomName != null) {
+		if(user.nickname != null) {
 			JSONObject response = new JSONObject();
 			String changeNickname = "User " + user.nickname + " changes nickname to "
 					+ parsedData.getString("nickname");

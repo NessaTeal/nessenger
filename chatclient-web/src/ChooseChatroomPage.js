@@ -14,18 +14,22 @@ class ChooseChatroomPage extends Component {
     );
 
     return (
-      <div>
-        <label>Choose your chatroom:</label>
-        <div className="list-group" id="chatrooms">
-          {chatrooms}
+      <div className="row">
+        <div className="col-md-12">
+          <div>
+            <label>Choose your chatroom:</label>
+            <div className="list-group" id="chatrooms">
+              {chatrooms}
+            </div>
+            <div className="form-group">
+              <label>Or create new one:</label>
+              <input type="text" className="form-control" value={this.props.newChatroomName} onChange={this.props.onNewChatroomChange} onKeyUp={(event) => this.onKeyUp(event)} />
+            </div>
+            <button className="btn btn-success" onClick={this.props.createChatroom}>
+    	        Proceed
+    	    </button>
+          </div>
         </div>
-        <div className="form-group">
-          <label>Or create new one:</label>
-          <input type="text" className="form-control" value={this.props.newChatroomName} onChange={this.props.onNewChatroomChange} onKeyUp={(event) => this.onKeyUp(event)} />
-        </div>
-        <button className="btn btn-success" onClick={this.props.createChatroom}>
-	        Proceed
-	    </button>
       </div>
     )
   }

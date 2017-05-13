@@ -35,26 +35,32 @@ class ChatroomPage extends Component {
 
     return (
       <div>
-        <div className="btn-group w-100">
-          <button className="btn btn-success w-100" onClick={this.props.changeNickname}>
-            Change nickname
-          </button>
-          <button className="btn btn-warning w-100" onClick={this.props.changeChatroom}>
-            Change chatroom
-          </button>
+        <div className="row">
+          <div className="btn-group col-md-12">
+            <button className="btn btn-success w-100" onClick={this.props.changeNickname}>
+              Change nickname
+            </button>
+            <button className="btn btn-warning w-100" onClick={this.props.changeChatroom}>
+              Change chatroom
+            </button>
+          </div>
         </div>
-        <div className="list-group" id="chat">
-          {messages}
+        <div className="row">
+          <div className="col-md-12">
+            <div className="list-group" id="chat">
+              {messages}
+            </div>
+            <div className="form-group">
+              <label>
+                Type your message here:
+              </label>
+              <input className="form-control" rows="5" value={this.state.message} onChange={(event) => this.onMessageChange(event)} onKeyUp={(event) => this.onKeyUp(event)}/>
+            </div>
+            <button className="btn btn-primary" onClick={() => this.sendMessage()}>
+              Send Message
+            </button>
+          </div>
         </div>
-        <div className="form-group">
-          <label>
-            Type your message here:
-          </label>
-          <input className="form-control" rows="5" value={this.state.message} onChange={(event) => this.onMessageChange(event)} onKeyUp={(event) => this.onKeyUp(event)}/>
-        </div>
-        <button className="btn btn-primary" onClick={() => this.sendMessage()}>
-          Send Message
-        </button>
       </div>
     )
   }

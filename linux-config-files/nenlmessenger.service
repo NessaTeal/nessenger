@@ -1,0 +1,8 @@
+[Unit]
+Description=Java client for NenlMessenger
+After=mongodb.service
+[Service]
+WorkingDirectory=/www/nenl-messenger
+ExecStart=/usr/bin/java -jar /www/nenl-messenger/nenl-messenger.jar -d
+[Install]
+WantedBy=multi-user.target

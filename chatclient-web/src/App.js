@@ -18,7 +18,8 @@ class App extends Component {
       chatroomList:[],
       messageList:[],
       newChatroomName:'',
-      nicknameWarning:false
+      nicknameWarning:false,
+      scrolled:false
       };
 
     this.chat = new Chat((data) => this.onMessage(data));
@@ -29,7 +30,6 @@ class App extends Component {
   }
 
   joinChatroom(chatroomName) {
-
     if(chatroomName !== this.state.chatroomName) {
       this.setState({messageList:[]});
       this.setState({chatroomName:chatroomName});
@@ -54,7 +54,9 @@ class App extends Component {
   }
 
   sendMessage(message) {
-    this.chat.sendMessage(message);
+  	if(message.trim() !== '')  {
+    	this.chat.sendMessage(message);
+	}
   }
 
   changePage(next) {
@@ -76,6 +78,16 @@ class App extends Component {
 
       this.setState({chatroomList:data.chatroomList});
     } else {
+	    if(this.state.page === 'chatroomPage') {
+			console.log(window.scrollY + window.innerHeight - document.body.scrollHeight);
+
+			//check if user scrolled to far from bottom of the page, if yes then disable autoscroll
+		    if (window.scrollY + window.innerHeight - document.body.scrollHeight < -150) {
+		      this.scrolled = true;
+		    } else {
+		      this.scrolled = false;
+		    }
+		}
 
       let messageList = this.state.messageList;
   
@@ -85,8 +97,13 @@ class App extends Component {
     }
   }
 
-  chooseNickname() {
+  componentDidUpdate() {
+	if(!this.scrolled && this.state.page === 'chatroomPage') {
+		window.scrollTo(0, document.body.scrollHeight);
+	}
+  }
 
+  chooseNickname() {
  	if (this.state.nickname.trim() === '') {
       this.setState({nicknameWarning:true});
       return;
@@ -114,7 +131,6 @@ class App extends Component {
     let content;
 
     if(this.state.page === 'loginPage') {
-
       content = <ChooseNicknamePage
                   warning={this.state.nicknameWarning}
                   nickname={this.state.nickname}
@@ -123,7 +139,6 @@ class App extends Component {
                 />
 
     } else if(this.state.page === 'chooseChatroomPage') {
-
       content = <ChooseChatroomPage
                   createChatroom={() => this.createChatroom(this.state.newChatroomName)}
                   onNewChatroomChange={(event) => this.onNewChatroomChange(event)}
@@ -131,12 +146,12 @@ class App extends Component {
                 />
 
     } else if(this.state.page === 'chatroomPage') {
-
       content = <ChatroomPage
                   changeNickname={() => this.changePage('loginPage')}
                   changeChatroom={() => this.changePage('chooseChatroomPage')}
                   sendMessage={(message) => this.sendMessage(message)}
                   messageList={this.state.messageList}
+                  ref="chatroomPage"
                 />
     }
 
@@ -144,11 +159,7 @@ class App extends Component {
       <div>
         <Header />
         <div className="container">
-          <div className="row">
-            <div className="col-md-12">
               {content}
-            </div>
-          </div>
         </div>
       </div>
     );

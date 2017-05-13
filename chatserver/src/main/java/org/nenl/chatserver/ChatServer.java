@@ -75,12 +75,12 @@ public class ChatServer extends WebSocketServer {
 	public void onOpen(WebSocket ws, ClientHandshake arg1) {
 		users.put(ws, new User());
 		
-		logger.info("User connects");
+		logger.debug("User connects");
 	}
 
 	@Override
 	public void onMessage(WebSocket ws, String message) {
-		logger.info("Received message: " + message);
+		logger.debug("Received message: " + message);
 		
 		JSONObject parsedData = new JSONObject(message);
 		
@@ -117,16 +117,6 @@ public class ChatServer extends WebSocketServer {
 				
 				break;
 				
-			case "disconnect":
-				disconnect(ws);
-				
-				return;
-				
-			case "chatroomExist":
-				chatroomExist(ws, parsedData);
-				
-				break;
-			//For now cannot be called from chat client
 			case "removeChatroom":
 				removeChatroom(parsedData);
 				
@@ -175,7 +165,7 @@ public class ChatServer extends WebSocketServer {
 		
 		user.nickname = parsedData.getString("nickname");
 		
-		logger.info("User chose nickname: " + user.nickname);
+		logger.debug("User chose nickname: " + user.nickname);
 	}
 	
 	protected void joinChatroom(WebSocket ws, JSONObject parsedData) {
@@ -200,7 +190,7 @@ public class ChatServer extends WebSocketServer {
 		
 		getPreviousMessages(ws, chatroomName);
 		
-		logger.info("User " + user.nickname + " joined chat " + chatroomName);
+		logger.debug("User " + user.nickname + " joined chat " + chatroomName);
 	}
 	
 	protected void quitChatroom(WebSocket ws, JSONObject parsedData) {
@@ -219,7 +209,7 @@ public class ChatServer extends WebSocketServer {
 		chatrooms.get(user.chatroomName).removeUser(ws);
 		chatrooms.get(user.chatroomName).writeToChat(response.toString());
 		
-		logger.info(message + " chat " + user.chatroomName);
+		logger.debug(message + " chat " + user.chatroomName);
 		
 		user.chatroomName = null;
 	}
@@ -245,7 +235,7 @@ public class ChatServer extends WebSocketServer {
 			users.remove(ws);
 		}
 		
-		logger.info("User " + user.nickname + " disconnects");
+		logger.debug("User " + user.nickname + " disconnects");
 	}
 	
 	protected void sendMessageToAll(WebSocket ws, JSONObject parsedData) {
@@ -265,7 +255,7 @@ public class ChatServer extends WebSocketServer {
 		
 		chatStorage.addMessage(user.chatroomName, response.toString());
 		
-		logger.info("User " + user.nickname + " in chat " + user.chatroomName + " wrote message: " + receivedMessage);
+		logger.debug("User " + user.nickname + " in chat " + user.chatroomName + " wrote message: " + receivedMessage);
 	}
 	
 	protected void returnChatroomList(WebSocket ws) {
@@ -288,7 +278,7 @@ public class ChatServer extends WebSocketServer {
 		
 		ws.send(response.toString());
 		
-		logger.info("User retrieved chatroom list");
+		logger.debug("User retrieved chatroom list");
 	}
 	
 	protected void createChatroom(WebSocket ws, JSONObject parsedData) {
@@ -306,33 +296,18 @@ public class ChatServer extends WebSocketServer {
 		
 		chatrooms.get(user.chatroomName).addUser(ws);
 		
-		logger.info("User " + user.nickname + " created and joined chat " + user.chatroomName);
-	}
-	
-	protected void chatroomExist(WebSocket ws, JSONObject parsedData) {
-		
-		User user = users.get(ws);
-		
-		JSONObject response = new JSONObject();
-
-		response.put("type", "management");
-		
-		user.chatroomName = parsedData.getString("chatroomName");
-		
-		if(chatrooms.containsKey(user.chatroomName)) {
-			response.put("exist", true);
-		} else {
-			response.put("exist", false);
-		}
-		
-		ws.send(response.toString());
-		
-		logger.info("User " + user.nickname + " checking if chatroom exists");
+		logger.debug("User " + user.nickname + " created and joined chat " + user.chatroomName);
 	}
 	
 	protected void getPreviousMessages(WebSocket ws, String chatroomName) {
 		for(String message : chatStorage.getPreviousMessages(chatroomName)) {
-			ws.send(message);
+			
+			JSONObject fixedMessage = new JSONObject(message);
+			
+			fixedMessage.put("date", fixedMessage.getJSONObject("date").getLong("$numberLong"));
+			fixedMessage.remove("_id");
+			
+			ws.send(fixedMessage.toString());
 		}
 	}
 	

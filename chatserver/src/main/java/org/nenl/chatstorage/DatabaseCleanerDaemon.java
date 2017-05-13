@@ -26,7 +26,7 @@ public class DatabaseCleanerDaemon implements Runnable {
 		
 			long timeLimit = System.currentTimeMillis() - 24 * 60 * 60 * 1000;
 			
-			messageCollection.deleteMany(Filters.lt("date", timeLimit)).toString();
+			messageCollection.deleteMany(Filters.lt("date", timeLimit));
 			
 			try {
 				TimeUnit.HOURS.sleep(1);

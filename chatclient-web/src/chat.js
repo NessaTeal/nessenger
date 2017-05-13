@@ -27,16 +27,7 @@ export class Chat {
 
 				let date;
 
-		        //Current workaround that MongoDB stores long in weird manner
-		        if(isNaN(response.date)) {
-
-		        	date = new Date(parseInt(response.date.$numberLong, 0));
-
-		        } else {
-
-		        	date = new Date(response.date);
-
-		        }
+				date = new Date(response.date);
 
 		        const dateString = ('0' + date.getDate()).slice(-2) + "/" + ('0' + (date.getMonth() + 1)).slice(-2) + " [" + date.getHours() + ":" + ('0' + date.getMinutes()).slice(-2) + "]";
 

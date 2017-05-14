@@ -41,16 +41,15 @@ namespace chatclient_windows
             this.DataContext = this;
 
             ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketReceivedMessage);
+            ws.Opened += new EventHandler(WebSocketOpened);
 
             ws.Open();
         }
 
         private void SendMessage(object sender, RoutedEventArgs e)
         {
-            ws.Send("{'type':'chooseNickname','nickname':'Nenl'}");
-            ws.Send("{'type':'joinChatroom','chatroomName':'General'}");
-            //ws.Send("{'type':'message','message':'ping'}");
-            //Words.Add(new Data("third"));
+            ws.Send("{'type':'message','message':'" + Message.Text + "'}");
+            Message.Text = "";
         }
 
         private void WebSocketReceivedMessage(object sender, MessageReceivedEventArgs e)
@@ -62,9 +61,10 @@ namespace chatclient_windows
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
         }
 
-        private void WebSocketSendMessage(object sender, EventArgs e)
+        private void WebSocketOpened(object sender, EventArgs e)
         {
-
+            ws.Send("{'type':'chooseNickname','nickname':'Nenl'}");
+            ws.Send("{'type':'joinChatroom','chatroomName':'General'}");
         }
     }
 }

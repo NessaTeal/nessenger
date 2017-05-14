@@ -7,21 +7,35 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <TextBox x:Name="Message" HorizontalAlignment="Left" Height="23" Margin="329,82,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="SendMessageButton" Click="SendMessage" Content="Button" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="75"/>
-        <ListBox x:Name="ItemList" ItemsSource="{Binding Path=Messages}" HorizontalAlignment="Left" Height="290" Margin="10,10,0,0" VerticalAlignment="Top" Width="314">
+        <TextBox x:Name="Message" HorizontalAlignment="Left" Height="32" Margin="10,278,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="369"/>
+        <Button x:Name="SendMessageButton" Click="SendMessage" Content="Button" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="123" Height="32"/>
+        <ListBox x:Name="ItemList" ItemsSource="{Binding Path=Messages}" HorizontalAlignment="Left" Height="263" Margin="10,10,0,0" VerticalAlignment="Top" Width="497" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding message}"/>
+                    <Grid Width="464">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding date}"/>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <TextBlock Text="{Binding origin}"/>
-                    </StackPanel>
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding origin}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Text="{Binding date}"/>
+
+                        <TextBlock Grid.ColumnSpan="3" Grid.Row="1" DockPanel.Dock="Bottom" Text="{Binding message}"/>
+                    </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-        </ListBox>
 
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Margin" Value="5,5,5,15"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
     </Grid>
 </Window>

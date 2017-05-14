@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Threading;
 using WebSocket4Net;
 
-namespace chatserver_windows
+namespace chatclient_windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -25,13 +25,13 @@ namespace chatserver_windows
     {
         WebSocket ws = new WebSocket("ws://nenlmessenger.tk/chatserver");
 
-        private ObservableCollection<Data> words = new ObservableCollection<Data>();
+        private ObservableCollection<MessageObject> messages = new ObservableCollection<MessageObject>();
 
-        public ObservableCollection<Data> Words
+        public ObservableCollection<MessageObject> Messages
         {
             get
             {
-                return words;
+                return messages;
             }
         }
 
@@ -41,7 +41,7 @@ namespace chatserver_windows
             this.DataContext = this;
 
             ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketReceivedMessage);
-            
+
             ws.Open();
         }
 
@@ -55,9 +55,9 @@ namespace chatserver_windows
 
         private void WebSocketReceivedMessage(object sender, MessageReceivedEventArgs e)
         {
-            dynamic messageObject = JsonConvert.DeserializeObject(e.Message);
+            MessageObject messageObject = JsonConvert.DeserializeObject<MessageObject>(e.Message);
 
-            Action action = () => Words.Add(new Data(messageObject.message.ToString()));
+            Action action = () => messages.Add(messageObject);
 
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
         }

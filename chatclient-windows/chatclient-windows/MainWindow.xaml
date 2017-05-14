@@ -1,18 +1,23 @@
-﻿<Window x:Class="chatserver_windows.MainWindow"
+﻿<Window x:Class="chatclient_windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:chatclient_windows"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <TextBox x:Name="Message" HorizontalAlignment="Left" Height="23" Margin="329,82,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
         <Button x:Name="SendMessageButton" Click="SendMessage" Content="Button" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="75"/>
-        <ListBox x:Name="ItemList" ItemsSource="{Binding Path=Words}" HorizontalAlignment="Left" Height="290" Margin="10,10,0,0" VerticalAlignment="Top" Width="314">
+        <ListBox x:Name="ItemList" ItemsSource="{Binding Path=Messages}" HorizontalAlignment="Left" Height="290" Margin="10,10,0,0" VerticalAlignment="Top" Width="314">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="{Binding message}"/>
+
+                        <TextBlock Text="{Binding date}"/>
+
+                        <TextBlock Text="{Binding origin}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

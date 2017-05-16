@@ -13,36 +13,36 @@ namespace chatclient_windows
 
     public partial class MainWindow : Window
     {
-        private Chat Chat;
+        private Chat _chat;
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
 
-            Chat = new Chat();
+            _chat = new Chat();
 
-            ItemList.ItemsSource = Chat.Messages;
+            ItemList.ItemsSource = _chat.Messages;
 
-            ChooseNicknameWindow ChooseNicknameWindow = new ChooseNicknameWindow(ref Chat.Nickname);
+            ChooseNicknameWindow ChooseNicknameWindow = new ChooseNicknameWindow(_chat.Nickname);
 
             if(ChooseNicknameWindow.ShowDialog() == true)
             {
-                Chat.ChooseNickname();
+                _chat.ChooseNickname(ChooseNicknameWindow.Nickname);
 
-                Chat.GetChatroomList();
+                _chat.GetChatroomList();
 
-                ChooseChatroomWindow ChooseChatroomWindow = new ChooseChatroomWindow(ref Chat.Chatrooms);
+                ChooseChatroomWindow ChooseChatroomWindow = new ChooseChatroomWindow(ref _chat.Chatrooms);
 
                 if(ChooseChatroomWindow.ShowDialog() == true)
                 {
                     if(ChooseChatroomWindow.NewChatroom)
                     {
-                        Chat.CreateChatroom(ChooseChatroomWindow.NewChatroomName);
+                        _chat.CreateChatroom(ChooseChatroomWindow.NewChatroomName);
                     }
                     else
                     {
-                        Chat.JoinChatroom(ChooseChatroomWindow.ChatroomName);
+                        _chat.JoinChatroom(ChooseChatroomWindow.ChatroomName);
                     }
                 }
                 else
@@ -58,8 +58,37 @@ namespace chatclient_windows
 
         private void SendMessage(object sender, RoutedEventArgs e)
         {
-            Chat.SendMessage(Message.Text);
+            _chat.SendMessage(Message.Text);
             Message.Text = "";
+        }
+
+        private void ChangeNickname(object sender, RoutedEventArgs e)
+        {
+            ChooseNicknameWindow ChooseNicknameWindow = new ChooseNicknameWindow(_chat.Nickname);
+
+            if(ChooseNicknameWindow.ShowDialog() == true)
+            {
+                _chat.ChooseNickname(ChooseNicknameWindow.Nickname);
+            }
+        }
+
+        private void ChangeChatroom(object sender, RoutedEventArgs e)
+        {
+            ChooseChatroomWindow ChooseChatroomWindow = new ChooseChatroomWindow(ref _chat.Chatrooms);
+
+            if (ChooseChatroomWindow.ShowDialog() == true)
+            {
+                _chat.QuitChatroom();
+
+                if (ChooseChatroomWindow.NewChatroom)
+                {
+                    _chat.CreateChatroom(ChooseChatroomWindow.NewChatroomName);
+                }
+                else
+                {
+                    _chat.JoinChatroom(ChooseChatroomWindow.ChatroomName);
+                }
+            }
         }
     }
 }

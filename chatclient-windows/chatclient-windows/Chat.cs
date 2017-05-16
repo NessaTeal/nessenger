@@ -10,9 +10,9 @@ namespace chatclient_windows
 {
     public class Chat
     {
-        public string Nickname = "Guest" + new Random().Next(10, 1000);
+        public string Nickname = "Guest" + new Random().Next(100, 1000);
 
-        public string ChatroomName;
+        public string ChatroomName = "";
 
         public ObservableCollection<MessageObject> Messages = new ObservableCollection<MessageObject>();
 
@@ -22,7 +22,6 @@ namespace chatclient_windows
 
         public Chat()
         {
-
             _websocket.Open();
 
             _websocket.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketReceivedMessage);
@@ -52,9 +51,14 @@ namespace chatclient_windows
             }
         }
 
-        public void ChooseNickname()
+        public void ChooseNickname(string Nickname)
         {
-            _websocket.Send("{'type':'chooseNickname','nickname':'" + Nickname + "'}");
+            if(Nickname != this.Nickname)
+            {
+                this.Nickname = Nickname;
+                _websocket.Send("{'type':'chooseNickname','nickname':'" + Nickname + "'}");
+            }
+
         }
         
         public void GetChatroomList()

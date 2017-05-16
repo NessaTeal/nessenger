@@ -7,8 +7,8 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <TextBox x:Name="Message" HorizontalAlignment="Left" Height="32" Margin="10,278,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="369"/>
-        <Button x:Name="SendMessageButton" Click="SendMessage" Content="Button" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="123" Height="32"/>
-        <ListBox x:Name="ItemList" HorizontalAlignment="Left" Height="263" Margin="10,10,0,0" VerticalAlignment="Top" Width="497" ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <Button Click="SendMessage" Content="Send message" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="123" Height="32"/>
+        <ListBox x:Name="ItemList" HorizontalAlignment="Left" Height="221" Margin="10,52,0,0" VerticalAlignment="Top" Width="497" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Width="464">
@@ -36,5 +36,7 @@
                 </Style>
             </ListBox.ItemContainerStyle>
         </ListBox>
+        <Button Click="ChangeNickname" Content="Change nickname" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="240" Height="37"/>
+        <Button Click="ChangeChatroom" Content="Change chatroom" HorizontalAlignment="Left" Margin="267,10,0,0" VerticalAlignment="Top" Width="240" Height="37"/>
     </Grid>
 </Window>

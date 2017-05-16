@@ -11,60 +11,55 @@ namespace chatclient_windows
     /// Interaction logic for MainWindow.xaml
     /// </summary>
 
-    public class Data
-    {
-        public Data(string Name)
-        {
-            this.Name = Name;
-        }
-
-        public string Name { get; set; }
-    }
-
     public partial class MainWindow : Window
     {
-        WebSocket ws = new WebSocket("ws://nenlmessenger.tk/chatserver");
-
-        private ObservableCollection<MessageObject> messages = new ObservableCollection<MessageObject>();
-
-        public ObservableCollection<MessageObject> Messages
-        {
-            get
-            {
-                return messages;
-            }
-        }
+        private Chat Chat;
 
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = this;
+            DataContext = this;
 
-            ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketReceivedMessage);
-            ws.Opened += new EventHandler(WebSocketOpened);
+            Chat = new Chat();
 
-            ws.Open();
+            ItemList.ItemsSource = Chat.Messages;
+
+            ChooseNicknameWindow ChooseNicknameWindow = new ChooseNicknameWindow(ref Chat.Nickname);
+
+            if(ChooseNicknameWindow.ShowDialog() == true)
+            {
+                Chat.ChooseNickname();
+
+                Chat.GetChatroomList();
+
+                ChooseChatroomWindow ChooseChatroomWindow = new ChooseChatroomWindow(ref Chat.Chatrooms);
+
+                if(ChooseChatroomWindow.ShowDialog() == true)
+                {
+                    if(ChooseChatroomWindow.NewChatroom)
+                    {
+                        Chat.CreateChatroom(ChooseChatroomWindow.NewChatroomName);
+                    }
+                    else
+                    {
+                        Chat.JoinChatroom(ChooseChatroomWindow.ChatroomName);
+                    }
+                }
+                else
+                {
+                    Close();
+                }
+            }
+            else
+            {
+                Close();
+            }
         }
 
         private void SendMessage(object sender, RoutedEventArgs e)
         {
-            ws.Send("{'type':'message','message':'" + Message.Text + "'}");
+            Chat.SendMessage(Message.Text);
             Message.Text = "";
-        }
-
-        private void WebSocketReceivedMessage(object sender, MessageReceivedEventArgs e)
-        {
-            MessageObject messageObject = JsonConvert.DeserializeObject<MessageObject>(e.Message);
-
-            Action action = () => messages.Add(messageObject);
-
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
-        }
-
-        private void WebSocketOpened(object sender, EventArgs e)
-        {
-            ws.Send("{'type':'chooseNickname','nickname':'Nenl'}");
-            ws.Send("{'type':'joinChatroom','chatroomName':'General'}");
         }
     }
 }

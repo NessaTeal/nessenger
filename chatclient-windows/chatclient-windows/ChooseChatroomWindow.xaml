@@ -1,0 +1,35 @@
+﻿<Window x:Class="chatclient_windows.ChooseChatroomWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ChooseChatroomWindow" Height="300" Width="290">
+    <Grid>
+        <ListBox x:Name="ChatroomList" MouseDoubleClick="ChooseChatroom" HorizontalAlignment="Left" Height="176" Margin="10,31,0,0" VerticalAlignment="Top" Width="262">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Width="246">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding chatroomName}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding chatroomSize}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Choose a chatroom:" VerticalAlignment="Top" Width="262"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,212,0,0" TextWrapping="Wrap" Text="Or create a new one:" VerticalAlignment="Top" Width="262"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="10,233,0,0" TextWrapping="Wrap" Text="{Binding NewChatroomName}" VerticalAlignment="Top" Width="180"/>
+        <Button Click="CreateChatroom" Content="Create" Margin="195,233,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="77"/>
+
+    </Grid>
+</Window>

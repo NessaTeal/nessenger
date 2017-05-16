@@ -79,7 +79,6 @@ class App extends Component {
       this.setState({chatroomList:data.chatroomList});
     } else {
 	    if(this.state.page === 'chatroomPage') {
-			console.log(window.scrollY + window.innerHeight - document.body.scrollHeight);
 
 			//check if user scrolled to far from bottom of the page, if yes then disable autoscroll
 		    if (window.scrollY + window.innerHeight - document.body.scrollHeight < -150) {

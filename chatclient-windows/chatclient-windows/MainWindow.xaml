@@ -3,13 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:chatclient_windows"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <TextBox x:Name="Message" HorizontalAlignment="Left" Height="32" Margin="10,278,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="369"/>
         <Button x:Name="SendMessageButton" Click="SendMessage" Content="Button" HorizontalAlignment="Left" Margin="384,278,0,0" VerticalAlignment="Top" Width="123" Height="32"/>
-        <ListBox x:Name="ItemList" ItemsSource="{Binding Path=Messages}" HorizontalAlignment="Left" Height="263" Margin="10,10,0,0" VerticalAlignment="Top" Width="497" ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <ListBox x:Name="ItemList" HorizontalAlignment="Left" Height="263" Margin="10,10,0,0" VerticalAlignment="Top" Width="497" ScrollViewer.VerticalScrollBarVisibility="Visible">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Width="464">
@@ -24,9 +23,9 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding origin}"/>
-                        <TextBlock Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Text="{Binding date}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding date}"/>
 
-                        <TextBlock Grid.ColumnSpan="3" Grid.Row="1" DockPanel.Dock="Bottom" Text="{Binding message}"/>
+                        <TextBlock Grid.ColumnSpan="3" Grid.Row="1" Text="{Binding message}"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

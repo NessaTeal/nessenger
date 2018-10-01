@@ -1,10 +1,8 @@
 Simple chat messenger with basic functionality. Contains both server and client implementations.
 
-CURRENTLY DESKTOP VERSION IS NOT WORKING. USE WEB VERSION FOUND ON vadimjprokopev.github.io/nenlmessenger
-
 Server by default listen on port 80.
 
-Client by default will try to connect to my server on 34.248.239.43. (Last updated and checked to be alive February 9, 2017)
+Client by default will try to connect to my server on 34.248.239.43. (Currently down)
 
 Server API:
 
@@ -22,7 +20,3 @@ Type of messages server accepts:
 
 On points 1, 3, 4, 5 and 7 server responds with JSON with type "message" and "message" contains message that will be written on users outputs.
 Point 6 produce JSON with type "management" and "chatroomList" contains JSONArray with list.
-
-Multiplatform jar is created using https://github.com/jendap/multiplatform-swt.
-
-Currently OS X requires to be run from command line using "java -XstartOnFirstThread -jar chatclient.jar".
